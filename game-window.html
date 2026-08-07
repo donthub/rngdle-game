@@ -7,14 +7,28 @@
 <div class="container">
     <div class="players-container">
         <div class="player-container">
-            <div class="player-name p1-name"></div>
+            <div class="player-name">
+                <span>Player 1: </span>
+                <span class="p1-name"></span>
+            </div>
+            <div class="player-score p1-score">0</div>
         </div>
         <div class="player-container">
-            <div class="player-name p2-name"></div>
+            <div class="player-name">
+                <span>Player 2: </span>
+                <span class="p2-name"></span>
+            </div>
+            <div class="player-score p2-score">0</div>
         </div>
     </div>
-    <div class="game-rounds-container">
-        Game rounds: <span class="game-rounds"></span>
+    <div class="info-container">
+        <div class="info-rounds">
+            Round <span class="current-round">0</span>/<span class="game-rounds"></span>
+        </div>
+        <div class="info-status">
+            <span>Game status: </span><span class="game-status">Waiting to start</span>
+        </div>
+        <div class="info-winner"></div>
     </div>
     <div class="start-container">
         <button class="start-button">Fight!</button>

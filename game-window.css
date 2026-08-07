@@ -1,0 +1,73 @@
+.container {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    margin-top: 80px;
+    row-gap: 50px;
+}
+
+.players-container {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+.player-container {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+}
+
+.player-name {
+    font-size: 36px;
+}
+
+.p1-name {
+    color: red;
+}
+
+.p2-name {
+    color: blue;
+}
+
+.player-score {
+    font-size: 48px;
+}
+
+.info-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    row-gap: 10px;
+}
+
+.info-rounds {
+    font-size: 24px;
+}
+
+.total-rounds {
+    display: flex;
+}
+
+.current-rounds {
+    display: flex;
+}
+
+.info-status {
+    display: flex;
+    font-size: 18px;
+    white-space-collapse: break-spaces;
+}
+
+.info-winner {
+    font-size: 64px;
+}
+
+.start-container {
+    display: flex;
+    justify-content: center;
+}
+
+.start-button {
+    font-size: 18px;
+}

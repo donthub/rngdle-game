@@ -2,6 +2,7 @@ import React from "react";
 
 import InfoPanel from "./components/InfoPanel.jsx";
 import PlayerPanel from "./components/PlayerPanel.jsx";
+import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
 
 function resolveWinner(p1Score, p2Score) {
@@ -21,8 +22,8 @@ function Game({ onReset }) {
     const [p2Name, setP2Name] = React.useState("");
     const [p1Score, setP1Score] = React.useState(0);
     const [p2Score, setP2Score] = React.useState(0);
-    const [p1Character, setP1Character] = React.useState(null);
-    const [p2Character, setP2Character] = React.useState(null);
+    const [p1Character, setP1Character] = React.useState(Character.SOL);
+    const [p2Character, setP2Character] = React.useState(Character.KY);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
 
     const gameStatusRef = React.useRef(gameStatus);

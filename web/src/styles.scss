@@ -18,7 +18,7 @@ $font-size-winner: 64px;
 // Metrics
 $info-row-gap: 10px;
 $portrait-height: 180px;
-$action-height: 240px;
+$action-height: 350px;
 
 .container {
     display: flex;
@@ -36,6 +36,7 @@ $action-height: 240px;
     display: flex;
     flex-direction: column;
     text-align: center;
+    width: 100%;
 }
 
 .player-name {
@@ -73,6 +74,8 @@ $action-height: 240px;
     flex-direction: column;
     align-items: center;
     row-gap: $info-row-gap;
+    white-space: nowrap;
+    align-items: center;
 }
 
 .info-rounds {
@@ -89,8 +92,10 @@ $action-height: 240px;
 
 .info-status {
     display: flex;
+    flex-direction: column;
     font-size: $font-size-status;
     white-space-collapse: break-spaces;
+    align-items: center;
 }
 
 .winner-container {

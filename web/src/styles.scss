@@ -19,6 +19,7 @@ $font-size-winner: 64px;
 $info-row-gap: 10px;
 $portrait-height: 180px;
 $action-height: 350px;
+$action-fade-duration: 200ms;
 
 .container {
     display: flex;
@@ -54,6 +55,7 @@ $action-height: 350px;
 }
 
 .player-action-container {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -62,6 +64,36 @@ $action-height: 350px;
     img {
         max-height: $action-height;
         max-width: 100%;
+    }
+}
+
+.player-action-image {
+    position: absolute;
+}
+
+.player-action-current {
+    animation: player-action-fade-in $action-fade-duration ease-in;
+}
+
+.player-action-previous {
+    animation: player-action-fade-out $action-fade-duration ease-out forwards;
+}
+
+@keyframes player-action-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes player-action-fade-out {
+    from {
+        opacity: 1;
+    }
+    to {
+        opacity: 0;
     }
 }
 

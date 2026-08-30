@@ -1,8 +1,8 @@
 import React from "react";
 
-export default function PlayerScorePanel({ player, label, name, score }) {
+export default function PlayerNameScorePanel({ player, label, name, score }) {
     return (
-        <div className="player-container">
+        <div className="player-name-score-container">
             <div className="player-name">
                 <span>{label}: </span>
                 <span className={`${player}-name`}>{name}</span>

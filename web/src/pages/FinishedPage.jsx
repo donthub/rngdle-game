@@ -1,6 +1,6 @@
 import React from "react";
 
-import PlayerScorePanel from "../components/PlayerScorePanel.jsx";
+import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
 import InfoRounds from "../components/InfoRounds.jsx";
 import InfoStatus from "../components/InfoStatus.jsx";
 
@@ -19,7 +19,9 @@ export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2,
     return (
         <div className="container">
             <div className="main-container">
-                <PlayerScorePanel player="p1" label="Player 1" {...p1}/>
+                <div className="player-container">
+                    <PlayerNameScorePanel player="p1" label="Player 1" {...p1}/>
+                </div>
                 <div className="info-container">
                     <InfoRounds currentRound={currentRound} rounds={rounds} />
                     <InfoStatus gameStatus={gameStatus}/>
@@ -27,7 +29,9 @@ export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2,
                         {winner.text}
                     </div>
                 </div>
-                <PlayerScorePanel player="p2" label="Player 2" {...p2}/>
+                <div className="player-container">
+                    <PlayerNameScorePanel player="p2" label="Player 2" {...p2}/>
+                </div>
             </div>
             <div className="controls-container">
                 <div className="reset-container">

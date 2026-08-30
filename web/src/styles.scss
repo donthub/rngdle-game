@@ -1,3 +1,24 @@
+// Colors
+$color-p1: red;
+$color-p2: blue;
+
+$player-colors: (
+    "p1": $color-p1,
+    "p2": $color-p2
+);
+
+// Font sizes
+$font-size-status: 18px;
+$font-size-button: 18px;
+$font-size-rounds: 24px;
+$font-size-player-name: 36px;
+$font-size-player-score: 48px;
+$font-size-winner: 64px;
+
+// Metrics
+$info-row-gap: 10px;
+$portrait-height: 180px;
+
 .container {
     display: flex;
     flex-direction: column;
@@ -17,30 +38,28 @@
 }
 
 .player-name {
-    font-size: 36px;
+    font-size: $font-size-player-name;
 }
 
-.p1-name {
-    color: red;
-}
-
-.p2-name {
-    color: blue;
+@each $player, $color in $player-colors {
+    .#{$player}-name {
+        color: $color;
+    }
 }
 
 .player-score {
-    font-size: 48px;
+    font-size: $font-size-player-score;
 }
 
 .info-container {
     display: flex;
     flex-direction: column;
     align-items: center;
-    row-gap: 10px;
+    row-gap: $info-row-gap;
 }
 
 .info-rounds {
-    font-size: 24px;
+    font-size: $font-size-rounds;
 }
 
 .total-rounds {
@@ -53,12 +72,12 @@
 
 .info-status {
     display: flex;
-    font-size: 18px;
+    font-size: $font-size-status;
     white-space-collapse: break-spaces;
 }
 
 .info-winner {
-    font-size: 64px;
+    font-size: $font-size-winner;
 }
 
 .start-container {
@@ -67,7 +86,7 @@
 }
 
 .start-button {
-    font-size: 18px;
+    font-size: $font-size-button;
 }
 
 .controls-container {
@@ -92,10 +111,10 @@
 
 .player-character-portrait {
     display: flex;
-}
 
-.player-character-portrait img {
-    height: 180px;
+    img {
+        height: $portrait-height;
+    }
 }
 
 .player-character-selector {

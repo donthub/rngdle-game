@@ -76,15 +76,17 @@ def player_game(
 ):
     with sync_playwright() as playwright:
         user_data_dir = tempfile.mkdtemp()
+        x, y = position
         width, height = size
         context = playwright.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
             headless=False,
-            viewport=None,
+            no_viewport=True,
             args=[
                 "--app=https://rngdle.com",
-                "--window-position=-3000,-3000",
-            ]
+                f"--window-position={x},{y}",
+                f"--window-size={width},{height}",
+            ],
         )
         page = context.pages[0] if context.pages else context.new_page()
 
@@ -94,9 +96,6 @@ def player_game(
         ready_event.set()  # signal that this page is ready
 
         roll_event.wait()
-
-        x, y = position
-        set_window_bounds(page=page, x=x, y=y, width=width, height=height)
 
         page.query_selector("[aria-label='Generate a new number']").click()
 
@@ -115,39 +114,3 @@ def player_game(
 
         stop_event.wait()
         context.close()
-
-
-def set_window_bounds(page, x: int, y: int, width: int, height: int):
-    cdp = page.context.new_cdp_session(page)
-    window_id = cdp.send("Browser.getWindowForTarget")["windowId"]
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"windowState": "normal"}
-    })
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"left": x, "top": y, "width": width, "height": height}
-    })
-
-    page.set_viewport_size({"width": width, "height": height})
-
-def set_window_state(page: Page, state: str):
-    """state: 'normal', 'minimized', 'maximized', or 'fullscreen'"""
-    cdp = page.context.new_cdp_session(page)
-    window_id = cdp.send("Browser.getWindowForTarget")["windowId"]
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"windowState": state}
-    })
-
-def set_window_offscreen(page):
-    cdp = page.context.new_cdp_session(page)
-    window_id = cdp.send("Browser.getWindowForTarget")["windowId"]
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"windowState": "normal"}
-    })
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"left": -3000, "top": -3000, "width": 640, "height": 1280}
-    })

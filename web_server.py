@@ -65,7 +65,7 @@ class WebServer:
         logger.info("Stopping Vite dev server")
         self.terminate_process_tree()
         try:
-            self.process.wait(timeout=10)
+            self.process.wait(timeout=3)
         except subprocess.TimeoutExpired:
             logger.warning("Vite dev server did not stop in time, killing it")
             self.kill_process_tree()

@@ -12,22 +12,23 @@ logger = logging.getLogger(__name__)
 def run(config: dict):
     logger.info(f"Config: {config}")
 
-    size = (1920, 480)
-    position = (0, 0)
+    x, y = (0, 0)
+    width, height = (1920, 480)
+
     user_data_dir = tempfile.mkdtemp()
-    width, height = size
     with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:
         context = playwright.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
             headless=False,
-            viewport=None,
+            no_viewport=True,
             args=[
                 f"--app={server.url}",  # removes tabs/address bar
+                f"--window-position={x},{y}",
+                f"--window-size={width},{height}",
             ],
         )
         page = context.pages[0] if context.pages else context.new_page()
-        x, y = position
-        set_window_bounds(page=page, x=x, y=y, width=width, height=height)
+        page.goto(server.url)
 
         page.wait_for_function("() => window.gameApi !== undefined")
 

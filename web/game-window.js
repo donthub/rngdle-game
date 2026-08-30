@@ -2,6 +2,7 @@ var gameRounds = 0;
 var currentRound = 0;
 var p1Score = 0;
 var p2Score = 0;
+var p1CharacterId = '';
 
 function setRounds(rounds) {
     gameRounds = rounds;
@@ -22,6 +23,9 @@ function startGame() {
     document.querySelector(".container").appendChild(element);
     document.querySelector(".game-status").innerText = "In progress";
     document.querySelector(".start-button").disabled = true;
+    document.querySelectorAll(".player-character-container").forEach(item => {
+        item.style = "display: none;"
+    });
 }
 
 function setCurrentRound(round) {
@@ -61,6 +65,36 @@ function finishGame() {
     document.querySelector(".info-winner").style = "color: " + color;
 }
 
+function selectCharacterP1(selectedCharacter) {
+    const characterName = selectedCharacter.getAttribute("title");
+    document.querySelector(".character-name-p1").innerText = characterName;
+    const characterId = selectedCharacter.getAttribute("data-id");
+    p1CharacterId = characterId;
+}
+
+function selectCharacterP2(selectedCharacter) {
+    const characterName = selectedCharacter.getAttribute("title");
+    document.querySelector(".character-name-p2").innerText = characterName;
+    const characterId = selectedCharacter.getAttribute("data-id");
+    p2CharacterId = characterId;
+}
+
 document.querySelector(".start-button").addEventListener("click", function (e) {
     startGame();
+});
+
+document.querySelectorAll(".player-character-selector-item-p1").forEach(item => {
+    item.addEventListener("click", function (e) {
+        e.preventDefault();
+        const element = this;
+        selectCharacterP1(element);
+    });
+});
+
+document.querySelectorAll(".player-character-selector-item-p2").forEach(item => {
+    item.addEventListener("click", function (e) {
+        e.preventDefault();
+        const element = this;
+        selectCharacterP2(element);
+    });
 });

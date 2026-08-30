@@ -25,7 +25,7 @@ def run(config: dict):
             headless=False,
             viewport=None,
             args=[
-                f"--app=file:///{script_dir}/game-window.html",  # removes tabs/address bar
+                f"--app=file:///{script_dir}/web/game-window.html",  # removes tabs/address bar
             ],
         )
         page = context.pages[0] if context.pages else context.new_page()

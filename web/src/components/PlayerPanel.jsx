@@ -14,14 +14,23 @@ export default function PlayerPanel({ player, label, name, onNameChange, score, 
                     <span className={`${player}-name`}>{name}</span>
                 )}
             </div>
-            <div className={`player-score ${player}-score`}>{score.toLocaleString("en-US")}</div>
+            {gameStatus !== GameStatus.WAITING && (
+                <div className={`player-score ${player}-score`}>{score.toLocaleString("en-US")}</div>
+            )}
             {gameStatus === GameStatus.WAITING && (
                 <div className="player-character-container">
                     <CharacterSelector player={player} onSelect={onSelectCharacter}/>
-                    <div className="character-name">
-                        <span>Selected character: </span>
-                        <span className={`character-name-${player}`}>{character ? character.name : ""}</span>
-                    </div>
+                    {character && (
+                        <>
+                            <div className="player-character-nameplate">
+                                <img alt={`${character.name} nameplate`} src={`assets/${character.id}/nameplate.png`} />
+                            </div>
+                            <div className="player-character-portrait">
+                                <img alt={`${character.name} portrait`} src={`assets/${character.id}/portrait.png`} />
+                            </div>
+                        </>
+
+                    )}
                 </div>
             )}
         </div>

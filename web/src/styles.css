@@ -83,3 +83,21 @@
 .exit-container {
     display: flex;
 }
+
+.player-character-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.player-character-portrait {
+    display: flex;
+}
+
+.player-character-portrait img {
+    height: 180px;
+}
+
+.player-character-selector {
+    display: flex;
+}

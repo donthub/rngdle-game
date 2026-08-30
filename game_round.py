@@ -18,8 +18,8 @@ def start_round(p1_result: dict, p2_result: dict):
         target=player_game,
         kwargs=dict(
             mode="Dark",
-            size=(960, 600),
-            position=(0, 480),
+            size=(978, 610),
+            position=(-10, 480),
             result_holder=p1_result,
             ready_event=p1_ready,
             roll_event=roll_event,
@@ -32,8 +32,8 @@ def start_round(p1_result: dict, p2_result: dict):
         target=player_game,
         kwargs=dict(
             mode="Dark",
-            size=(960, 600),
-            position=(960, 480),
+            size=(978, 610),
+            position=(952, 480),
             result_holder=p2_result,
             ready_event=p2_ready,
             roll_event=roll_event,
@@ -98,6 +98,11 @@ def player_game(
         roll_event.wait()
 
         page.query_selector("[aria-label='Generate a new number']").click()
+
+        page.get_by_text("Badge breakdown").wait_for(timeout=0)
+        # Remove "Badge breakdown element"
+        page.locator("main").locator("> div").nth(0).locator("> div").nth(3).locator("> div").nth(0).evaluate(
+            "element => element.remove()")
 
         page.wait_for_selector("[aria-label='Copy to clipboard']")
         score = page.locator("main").locator("> div").nth(0).locator("> div").nth(2).locator("> div").nth(

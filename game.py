@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 def run(config: dict):
     logger.info(f"Config: {config}")
 
-    x, y = (0, 0)
-    width, height = (1920, 480)
+    x, y = (-10, -50)
+    width, height = (1940, 540)
 
     user_data_dir = tempfile.mkdtemp()
     with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:

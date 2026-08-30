@@ -31,13 +31,15 @@ def run(config: dict):
 
         page.wait_for_function("() => window.gameApi !== undefined")
 
-        page.evaluate("rounds => window.gameApi.setRounds(rounds)", config["rounds"])
-        page.evaluate("name => window.gameApi.setP1Name(name)", config["p1_name"])
-        page.evaluate("name => window.gameApi.setP2Name(name)", config["p2_name"])
+        page.wait_for_function("() => window.gameApi.isStarted()", timeout=0)
+        p1_name = page.evaluate("() => window.gameApi.getP1Name()")
+        p2_name = page.evaluate("() => window.gameApi.getP2Name()")
+        rounds = int(page.evaluate("() => window.gameApi.getRounds()"))
+        logger.info(f"P1 name: {p1_name}")
+        logger.info(f"P2 name: {p2_name}")
+        logger.info(f"Rounds: {rounds}")
 
-        page.wait_for_selector(".game-started", state="attached", timeout=0)
-
-        for i in range(config["rounds"]):
+        for i in range(rounds):
             page.evaluate("round => window.gameApi.setCurrentRound(round)", i)
             p1_result, p2_result = {}, {}
             start_round(p1_result, p2_result)

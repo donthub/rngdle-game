@@ -18,6 +18,7 @@ $font-size-winner: 64px;
 // Metrics
 $info-row-gap: 10px;
 $portrait-height: 180px;
+$action-height: 240px;
 
 .container {
     display: flex;
@@ -49,6 +50,22 @@ $portrait-height: 180px;
 
 .player-score {
     font-size: $font-size-player-score;
+}
+
+.player-action-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $action-height;
+
+    img {
+        max-height: $action-height;
+        max-width: 100%;
+    }
+}
+
+.p2-action {
+    transform: scale(-1, 1);
 }
 
 .info-container {

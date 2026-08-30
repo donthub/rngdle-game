@@ -1,6 +1,9 @@
-export default function PlayerActionPanel({ player, name, score }) {
+import React from "react";
+
+export default function PlayerActionPanel({ player, character, action }) {
     return (
-        <div className="player-action-container">
+        <div className={`player-action-container ${player}-action`}>
+            {action === null ? null : <img alt={`${character.name} move`} src={action}/>}
         </div>
     );
 }

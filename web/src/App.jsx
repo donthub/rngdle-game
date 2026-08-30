@@ -3,15 +3,15 @@ import React from "react";
 import FinishedPage from "./pages/FinishedPage.jsx";
 import InProgressPage from "./pages/InProgressPage.jsx";
 import WaitingPage from "./pages/WaitingPage.jsx";
+import { resolveBadgeMoveImage } from "./badges.js";
 import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
 
-function addP1Badge(badge) {
-    console.log(`P1 badge ${badge} added`);
-}
-
-function addP2Badge(badge) {
-    console.log(`P2 badge ${badge} added`);
+function addBadge(badge, characterRef, setAction) {
+    const image = resolveBadgeMoveImage(badge, characterRef.current);
+    if (image !== null) {
+        setAction(image);
+    }
 }
 
 function Game({ onReset }) {
@@ -23,6 +23,8 @@ function Game({ onReset }) {
     const [p2Score, setP2Score] = React.useState(0);
     const [p1Character, setP1Character] = React.useState(Character.SOL);
     const [p2Character, setP2Character] = React.useState(Character.KY);
+    const [p1Action, setP1Action] = React.useState(null);
+    const [p2Action, setP2Action] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
 
     const gameStatusRef = React.useRef(gameStatus);
@@ -33,6 +35,10 @@ function Game({ onReset }) {
     p1NameRef.current = p1Name;
     const p2NameRef = React.useRef(p2Name);
     p2NameRef.current = p2Name;
+    const p1CharacterRef = React.useRef(p1Character);
+    p1CharacterRef.current = p1Character;
+    const p2CharacterRef = React.useRef(p2Character);
+    p2CharacterRef.current = p2Character;
 
     // Imperative bridge used by the Playwright driver (see game.py).
     React.useEffect(() => {
@@ -41,8 +47,8 @@ function Game({ onReset }) {
             setCurrentRound: value => setCurrentRound(Number(value)),
             addP1Score: value => setP1Score(score => score + Number(value)),
             addP2Score: value => setP2Score(score => score + Number(value)),
-            addP1Badge: value => addP1Badge(value),
-            addP2Badge: value => addP2Badge(value),
+            addP1Badge: value => addBadge(value, p1CharacterRef, setP1Action),
+            addP2Badge: value => addBadge(value, p2CharacterRef, setP2Action),
             startGame: () => setGameStatus(GameStatus.IN_PROGRESS),
             finishGame: () => setGameStatus(GameStatus.FINISHED),
 
@@ -65,6 +71,7 @@ function Game({ onReset }) {
         score: p1Score,
         character: p1Character,
         onSelectCharacter: setP1Character,
+        action: p1Action,
     };
     const p2 = {
         name: p2Name,
@@ -72,6 +79,7 @@ function Game({ onReset }) {
         score: p2Score,
         character: p2Character,
         onSelectCharacter: setP2Character,
+        action: p2Action,
     };
     const onExit = () => setGameStatus(GameStatus.EXITED);
 

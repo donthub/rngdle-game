@@ -10,7 +10,7 @@ const BADGE_MOVE_TYPES = Object.freeze({
     MYTHIC: "instantkill",
 });
 
-export function resolveBadgeMoveImage(badge, character) {
+export function resolveBadgeMoveImage(badge, character, previousImage = null) {
     const moveType = BADGE_MOVE_TYPES[badge];
     if (moveType === undefined) {
         return null;
@@ -21,5 +21,8 @@ export function resolveBadgeMoveImage(badge, character) {
         return null;
     }
 
-    return images[Math.floor(Math.random() * images.length)];
+    const candidates = images.filter(image => image !== previousImage);
+    const pool = candidates.length === 0 ? images : candidates;
+
+    return pool[Math.floor(Math.random() * pool.length)];
 }

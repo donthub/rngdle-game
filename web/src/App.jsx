@@ -8,10 +8,10 @@ import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
 
 function addBadge(badge, characterRef, setAction) {
-    const image = resolveBadgeMoveImage(badge, characterRef.current);
-    if (image !== null) {
-        setAction(image);
-    }
+    setAction(previousImage => {
+        const image = resolveBadgeMoveImage(badge, characterRef.current, previousImage);
+        return image === null ? previousImage : image;
+    });
 }
 
 function Game({ onReset }) {

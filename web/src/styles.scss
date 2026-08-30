@@ -76,8 +76,10 @@ $portrait-height: 180px;
     white-space-collapse: break-spaces;
 }
 
-.info-winner {
+.winner-container {
+    display: flex;
     font-size: $font-size-winner;
+    justify-content: center;
 }
 
 .start-container {

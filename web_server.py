@@ -11,6 +11,7 @@ from pathlib import Path
 logger = logging.getLogger(__name__)
 
 WEB_DIR = Path(__file__).resolve().parent / "web"
+IS_WINDOWS = os.name == "nt"
 
 
 class WebServer:
@@ -37,7 +38,9 @@ class WebServer:
         self.process = subprocess.Popen(
             [npm, "run", "dev", "--", "--port", str(self.port), "--strictPort"],
             cwd=WEB_DIR,
-            start_new_session=True,  # own process group, so the whole npm/vite tree can be stopped
+            # Own process group, so the whole npm/vite tree can be stopped
+            start_new_session=not IS_WINDOWS,
+            creationflags=subprocess.CREATE_NEW_PROCESS_GROUP if IS_WINDOWS else 0,
         )
         self.wait_until_ready()
 
@@ -60,19 +63,38 @@ class WebServer:
             return
 
         logger.info("Stopping Vite dev server")
-        self.signal_process_group(signal.SIGTERM)
+        self.terminate_process_tree()
         try:
             self.process.wait(timeout=10)
         except subprocess.TimeoutExpired:
             logger.warning("Vite dev server did not stop in time, killing it")
-            self.signal_process_group(signal.SIGKILL)
+            self.kill_process_tree()
             self.process.wait()
+
+    def terminate_process_tree(self):
+        if IS_WINDOWS:
+            self.taskkill(force=False)
+        else:
+            self.signal_process_group(signal.SIGTERM)
+
+    def kill_process_tree(self):
+        if IS_WINDOWS:
+            self.taskkill(force=True)
+        else:
+            self.signal_process_group(signal.SIGKILL)
 
     def signal_process_group(self, sig: int):
         try:
             os.killpg(os.getpgid(self.process.pid), sig)
-        except ProcessLookupError:
+        except (ProcessLookupError, PermissionError):
             pass
+
+    def taskkill(self, force: bool):
+        # taskkill /T walks the npm -> node tree, which is the Windows counterpart of killpg
+        command = ["taskkill", "/T", "/PID", str(self.process.pid)]
+        if force:
+            command.insert(1, "/F")
+        subprocess.run(command, capture_output=True)
 
 
 def resolve_npm() -> str:

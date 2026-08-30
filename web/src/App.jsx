@@ -15,6 +15,14 @@ function resolveWinner(p1Score, p2Score) {
     return { text: "Draw!", color: "gray" };
 }
 
+function addP1Badge(badge) {
+    console.log(`P1 badge ${badge} added`);
+}
+
+function addP2Badge(badge) {
+    console.log(`P2 badge ${badge} added`);
+}
+
 function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
@@ -42,6 +50,8 @@ function Game({ onReset }) {
             setCurrentRound: value => setCurrentRound(Number(value)),
             addP1Score: value => setP1Score(score => score + Number(value)),
             addP2Score: value => setP2Score(score => score + Number(value)),
+            addP1Badge: value => addP1Badge(value),
+            addP2Badge: value => addP2Badge(value),
             startGame: () => setGameStatus(GameStatus.IN_PROGRESS),
             finishGame: () => setGameStatus(GameStatus.FINISHED),
 

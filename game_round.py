@@ -8,7 +8,7 @@ from playwright.sync_api import sync_playwright, Page
 logger = logging.getLogger(__name__)
 
 
-def start_round(p1_result: dict, p2_result: dict):
+def start_round(game_page: Page, p1_result: dict, p2_result: dict):
     p1_ready, p2_ready = threading.Event(), threading.Event()
     roll_event = threading.Event()
     p1_score, p2_score = threading.Event(), threading.Event()
@@ -17,6 +17,8 @@ def start_round(p1_result: dict, p2_result: dict):
     t1 = threading.Thread(
         target=player_game,
         kwargs=dict(
+            game_page=game_page,
+            player="p1",
             mode="Dark",
             size=(978, 610),
             position=(-10, 480),
@@ -31,6 +33,8 @@ def start_round(p1_result: dict, p2_result: dict):
     t2 = threading.Thread(
         target=player_game,
         kwargs=dict(
+            game_page=game_page,
+            player="p2",
             mode="Dark",
             size=(978, 610),
             position=(952, 480),
@@ -65,6 +69,8 @@ def start_round(p1_result: dict, p2_result: dict):
 
 
 def player_game(
+        game_page: Page,
+        player: str,
         mode: str,
         size: tuple,
         position: tuple,
@@ -104,6 +110,8 @@ def player_game(
         page.locator("main").locator("> div").nth(0).locator("> div").nth(3).locator("> div").nth(0).evaluate(
             "element => element.remove()")
 
+        process_badges(page, game_page, player)
+
         page.wait_for_selector("[aria-label='Copy to clipboard']")
         score = page.locator("main").locator("> div").nth(0).locator("> div").nth(2).locator("> div").nth(
             0).text_content()
@@ -119,3 +127,30 @@ def player_game(
 
         stop_event.wait()
         context.close()
+
+def process_badges(page: Page, game_page: Page, player: str):
+    processed_badges_count = 0
+    is_processing = True
+    while is_processing:
+        badges_container = page.locator(".space-y-3")
+        if badges_container:
+            badges_elements = badges_container.locator("> div")
+            badges_elements_count = badges_elements.count()
+            while processed_badges_count < badges_elements_count:
+                badge_rarity = (badges_elements.nth(badges_elements_count - processed_badges_count - 1)
+                                .locator("> div").nth(0)
+                                .locator("> div").nth(0)
+                                .locator("> div").nth(0)
+                                .locator("> span").nth(2).text_content())
+                logger.info(f"[{player}] Badge rarity: {badge_rarity}")
+                if player == "p1":
+                    game_page.evaluate("badge => window.gameApi.addP1Badge(badge)", badge_rarity)
+                elif player == "p2":
+                    game_page.evaluate("badge => window.gameApi.addP2Badge(badge)", badge_rarity)
+                processed_badges_count += 1
+
+            score_element = page.locator("[aria-label='Copy to clipboard']")
+            if score_element.count() > 0:
+                return
+
+        time.sleep(0.1)

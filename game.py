@@ -12,8 +12,8 @@ logger = logging.getLogger(__name__)
 def run(config: dict):
     logger.info(f"Config: {config}")
 
-    x, y = (-10, -50)
-    width, height = (1940, 540)
+    x, y = (-10, -30)
+    width, height = (1940, 520)
 
     user_data_dir = tempfile.mkdtemp()
     with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:
@@ -49,7 +49,7 @@ def run(config: dict):
             for i in range(rounds):
                 page.evaluate("round => window.gameApi.setCurrentRound(round)", i)
                 p1_result, p2_result = {}, {}
-                start_round(p1_result, p2_result)
+                start_round(page, p1_result, p2_result)
                 page.evaluate("score => window.gameApi.addP1Score(score)", p1_result["score"])
                 page.evaluate("score => window.gameApi.addP2Score(score)", p2_result["score"])
 

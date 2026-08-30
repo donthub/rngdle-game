@@ -1,4 +1,5 @@
 import logging
+import queue
 import tempfile
 import threading
 import time
@@ -13,16 +14,17 @@ def start_round(game_page: Page, p1_result: dict, p2_result: dict):
     roll_event = threading.Event()
     p1_score, p2_score = threading.Event(), threading.Event()
     stop_event = threading.Event()
+    badge_queue = queue.Queue()
 
     t1 = threading.Thread(
         target=player_game,
         kwargs=dict(
-            game_page=game_page,
             player="p1",
             mode="Dark",
             size=(978, 610),
             position=(-10, 480),
             result_holder=p1_result,
+            badge_queue=badge_queue,
             ready_event=p1_ready,
             roll_event=roll_event,
             score_event=p1_score,
@@ -33,12 +35,12 @@ def start_round(game_page: Page, p1_result: dict, p2_result: dict):
     t2 = threading.Thread(
         target=player_game,
         kwargs=dict(
-            game_page=game_page,
             player="p2",
             mode="Dark",
             size=(978, 610),
             position=(952, 480),
             result_holder=p2_result,
+            badge_queue=badge_queue,
             ready_event=p2_ready,
             roll_event=roll_event,
             score_event=p2_score,
@@ -56,9 +58,9 @@ def start_round(game_page: Page, p1_result: dict, p2_result: dict):
 
     roll_event.set()
 
-    p1_score.wait()
+    wait_for_event_add_pending_badges(p1_score, game_page, badge_queue)
     logger.info(f"P1 score: {p1_result['score']}")
-    p2_score.wait()
+    wait_for_event_add_pending_badges(p2_score, game_page, badge_queue)
     logger.info(f"P2 score: {p2_result['score']}")
 
     time.sleep(3)
@@ -66,15 +68,34 @@ def start_round(game_page: Page, p1_result: dict, p2_result: dict):
     stop_event.set()
     t1.join()
     t2.join()
+    add_pending_badges(game_page, badge_queue)
+
+
+def wait_for_event_add_pending_badges(event: threading.Event, game_page: Page, badge_queue: queue.Queue):
+    while not event.wait(0.05):
+        add_pending_badges(game_page, badge_queue)
+    add_pending_badges(game_page, badge_queue)
+
+
+def add_pending_badges(game_page: Page, badge_queue: queue.Queue):
+    while True:
+        try:
+            player, badge_rarity = badge_queue.get_nowait()
+        except queue.Empty:
+            return
+        if player == "p1":
+            game_page.evaluate("badge => window.gameApi.addP1Badge(badge)", badge_rarity)
+        elif player == "p2":
+            game_page.evaluate("badge => window.gameApi.addP2Badge(badge)", badge_rarity)
 
 
 def player_game(
-        game_page: Page,
         player: str,
         mode: str,
         size: tuple,
         position: tuple,
         result_holder: dict,
+        badge_queue: queue.Queue,
         ready_event: threading.Event,
         roll_event: threading.Event,
         score_event: threading.Event,
@@ -110,7 +131,7 @@ def player_game(
         page.locator("main").locator("> div").nth(0).locator("> div").nth(3).locator("> div").nth(0).evaluate(
             "element => element.remove()")
 
-        process_badges(page, game_page, player)
+        process_badges(page, badge_queue, player)
 
         page.wait_for_selector("[aria-label='Copy to clipboard']")
         score = page.locator("main").locator("> div").nth(0).locator("> div").nth(2).locator("> div").nth(
@@ -128,7 +149,7 @@ def player_game(
         stop_event.wait()
         context.close()
 
-def process_badges(page: Page, game_page: Page, player: str):
+def process_badges(page: Page, badge_queue: queue.Queue, player: str):
     processed_badges_count = 0
     is_processing = True
     while is_processing:
@@ -143,10 +164,7 @@ def process_badges(page: Page, game_page: Page, player: str):
                                 .locator("> div").nth(0)
                                 .locator("> span").nth(2).text_content())
                 logger.info(f"[{player}] Badge rarity: {badge_rarity}")
-                if player == "p1":
-                    game_page.evaluate("badge => window.gameApi.addP1Badge(badge)", badge_rarity)
-                elif player == "p2":
-                    game_page.evaluate("badge => window.gameApi.addP2Badge(badge)", badge_rarity)
+                badge_queue.put((player, badge_rarity))
                 processed_badges_count += 1
 
             score_element = page.locator("[aria-label='Copy to clipboard']")

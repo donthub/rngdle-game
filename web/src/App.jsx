@@ -14,7 +14,7 @@ function resolveWinner(p1Score, p2Score) {
     return { text: "Draw!", color: "gray" };
 }
 
-export default function App() {
+function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [p1Name, setP1Name] = React.useState("");
@@ -46,6 +46,8 @@ export default function App() {
 
             // Getters
             isStarted: () => gameStatusRef.current === GameStatus.IN_PROGRESS,
+            isFinished: () => gameStatusRef.current === GameStatus.FINISHED,
+            isExited: () => gameStatusRef.current === GameStatus.EXITED,
             getRounds: () => roundsRef.current,
             getP1Name: () => p1NameRef.current,
             getP2Name: () => p2NameRef.current,
@@ -82,11 +84,26 @@ export default function App() {
                        winner={gameStatus === GameStatus.FINISHED ? resolveWinner(p1Score, p2Score) : null}/>
             {gameStatus === GameStatus.WAITING &&
                 <div className="start-container">
-                    <button className="start-button" disabled={gameStatus !== GameStatus.WAITING}
-                            onClick={() => setGameStatus(GameStatus.IN_PROGRESS)}>Fight!
-                    </button>
+                    <button className="start-button" onClick={() => setGameStatus(GameStatus.IN_PROGRESS)}>Fight!</button>
+                </div>
+            }
+            {gameStatus === GameStatus.FINISHED &&
+                <div className="controls-container">
+                    <div className="reset-container">
+                        <button className="reset-button" onClick={onReset}>Reset</button>
+                    </div>
+                    <div className="exit-container">
+                        <button className="exit-button" onClick={() => setGameStatus(GameStatus.EXITED)}>Exit</button>
+                    </div>
                 </div>
             }
         </div>
     );
+}
+
+export default function App() {
+    // Bumping the key remounts Game, so every useState falls back to its default.
+    const [gameKey, setGameKey] = React.useState(0);
+
+    return <Game key={gameKey} onReset={() => setGameKey(key => key + 1)}/>;
 }

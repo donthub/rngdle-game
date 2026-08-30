@@ -1,11 +1,9 @@
 import logging
 import tempfile
-import threading
-from pathlib import Path
 
 from playwright.sync_api import sync_playwright
 
-import game_round
+import web_server
 from game_round import start_round
 
 logger = logging.getLogger(__name__)
@@ -18,34 +16,35 @@ def run(config: dict):
     position = (0, 0)
     user_data_dir = tempfile.mkdtemp()
     width, height = size
-    script_dir = Path(__file__).resolve().parent
-    with sync_playwright() as playwright:
+    with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:
         context = playwright.chromium.launch_persistent_context(
             user_data_dir=user_data_dir,
             headless=False,
             viewport=None,
             args=[
-                f"--app=file:///{script_dir}/web/game-window.html",  # removes tabs/address bar
+                f"--app={server.url}",  # removes tabs/address bar
             ],
         )
         page = context.pages[0] if context.pages else context.new_page()
         x, y = position
         set_window_bounds(page=page, x=x, y=y, width=width, height=height)
 
-        page.evaluate(f"() => setRounds({config['rounds']});")
-        page.evaluate(f"() => setP1Name(\"{config['p1_name']}\");")
-        page.evaluate(f"() => setP2Name(\"{config['p2_name']}\");")
+        page.wait_for_function("() => window.gameApi !== undefined")
+
+        page.evaluate("rounds => window.gameApi.setRounds(rounds)", config["rounds"])
+        page.evaluate("name => window.gameApi.setP1Name(name)", config["p1_name"])
+        page.evaluate("name => window.gameApi.setP2Name(name)", config["p2_name"])
 
         page.wait_for_selector(".game-started", state="attached", timeout=0)
 
-        for i in range(config['rounds']):
-            page.evaluate(f"() => setCurrentRound({i});")
+        for i in range(config["rounds"]):
+            page.evaluate("round => window.gameApi.setCurrentRound(round)", i)
             p1_result, p2_result = {}, {}
             start_round(p1_result, p2_result)
-            page.evaluate(f"() => addP1Score({p1_result['score']});")
-            page.evaluate(f"() => addP2Score({p2_result['score']});")
+            page.evaluate("score => window.gameApi.addP1Score(score)", p1_result["score"])
+            page.evaluate("score => window.gameApi.addP2Score(score)", p2_result["score"])
 
-        page.evaluate(f"() => finishGame({p2_result['score']});")
+        page.evaluate("() => window.gameApi.finishGame()")
 
         input()
 

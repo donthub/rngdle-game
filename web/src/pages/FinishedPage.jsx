@@ -1,6 +1,8 @@
 import React from "react";
 
-import Scoreboard from "../components/Scoreboard.jsx";
+import PlayerScorePanel from "../components/PlayerScorePanel.jsx";
+import InfoRounds from "../components/InfoRounds.jsx";
+import InfoStatus from "../components/InfoStatus.jsx";
 
 function resolveWinner(p1Score, p2Score) {
     if (p1Score > p2Score) {
@@ -16,10 +18,16 @@ export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2,
     const winner = resolveWinner(p1.score, p2.score);
     return (
         <div className="container">
-            <Scoreboard gameStatus={gameStatus} currentRound={currentRound} rounds={rounds}
-                        p1={p1} p2={p2}/>
-            <div className="winner-container" style={{ color: winner.color }}>
-                {winner.text}
+            <div className="main-container">
+                <PlayerScorePanel player="p1" label="Player 1" {...p1}/>
+                <div className="info-container">
+                    <InfoRounds currentRound={currentRound} rounds={rounds} />
+                    <InfoStatus gameStatus={gameStatus}/>
+                    <div className="winner-container" style={{ color: winner.color }}>
+                        {winner.text}
+                    </div>
+                </div>
+                <PlayerScorePanel player="p2" label="Player 2" {...p2}/>
             </div>
             <div className="controls-container">
                 <div className="reset-container">

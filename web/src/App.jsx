@@ -59,7 +59,7 @@ function Game({ onReset }) {
 
     return (
         <div className="container">
-            <div className="players-container">
+            <div className="main-container">
                 <PlayerPanel player="p1"
                              label="Player 1"
                              name={p1Name}
@@ -68,6 +68,11 @@ function Game({ onReset }) {
                              character={p1Character}
                              onSelectCharacter={setP1Character}
                              gameStatus={gameStatus}/>
+                <InfoPanel currentRound={currentRound === null ? 0 : currentRound + 1}
+                           rounds={rounds}
+                           onRoundsChange={setRounds}
+                           gameStatus={gameStatus}
+                           winner={gameStatus === GameStatus.FINISHED ? resolveWinner(p1Score, p2Score) : null}/>
                 <PlayerPanel player="p2"
                              label="Player 2"
                              name={p2Name}
@@ -77,14 +82,14 @@ function Game({ onReset }) {
                              onSelectCharacter={setP2Character}
                              gameStatus={gameStatus}/>
             </div>
-            <InfoPanel currentRound={currentRound === null ? 0 : currentRound + 1}
-                       rounds={rounds}
-                       onRoundsChange={setRounds}
-                       gameStatus={gameStatus}
-                       winner={gameStatus === GameStatus.FINISHED ? resolveWinner(p1Score, p2Score) : null}/>
             {gameStatus === GameStatus.WAITING &&
-                <div className="start-container">
-                    <button className="start-button" onClick={() => setGameStatus(GameStatus.IN_PROGRESS)}>Fight!</button>
+                <div className="controls-container">
+                    <div className="start-container">
+                        <button className="start-button" onClick={() => setGameStatus(GameStatus.IN_PROGRESS)}>Fight!</button>
+                    </div>
+                    <div className="exit-container">
+                        <button className="exit-button" onClick={() => setGameStatus(GameStatus.EXITED)}>Exit</button>
+                    </div>
                 </div>
             }
             {gameStatus === GameStatus.FINISHED &&

@@ -34,7 +34,11 @@ def run(config: dict):
 
         is_exited = False
         while not is_exited:
-            page.wait_for_function("() => window.gameApi.isStarted()", timeout=0)
+            page.wait_for_function("() => window.gameApi.isStarted() || window.gameApi.isExited()", timeout=0)
+            is_exited = page.evaluate("() => window.gameApi.isExited()")
+            if is_exited:
+                break
+
             p1_name = page.evaluate("() => window.gameApi.getP1Name()")
             p2_name = page.evaluate("() => window.gameApi.getP2Name()")
             rounds = int(page.evaluate("() => window.gameApi.getRounds()"))
@@ -54,20 +58,3 @@ def run(config: dict):
             is_exited = page.evaluate("() => window.gameApi.isExited()")
 
         context.close()
-
-
-def set_window_bounds(page, x: int, y: int, width: int, height: int):
-    cdp = page.context.new_cdp_session(page)
-    window_id = cdp.send("Browser.getWindowForTarget")["windowId"]
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"windowState": "normal"}
-    })
-    cdp.send("Browser.setWindowBounds", {
-        "windowId": window_id,
-        "bounds": {"left": x, "top": y, "width": width, "height": height}
-    })
-
-    page.wait_for_timeout(100)
-
-    page.set_viewport_size({"width": width, "height": height})

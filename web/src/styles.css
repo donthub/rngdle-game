@@ -2,11 +2,9 @@
     display: flex;
     flex-direction: column;
     width: 100%;
-    margin-top: 80px;
-    row-gap: 50px;
 }
 
-.players-container {
+.main-container {
     display: flex;
     flex-direction: row;
     justify-content: space-around;

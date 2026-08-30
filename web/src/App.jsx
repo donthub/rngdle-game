@@ -2,10 +2,7 @@ import React from "react";
 
 import InfoPanel from "./components/InfoPanel.jsx";
 import PlayerPanel from "./components/PlayerPanel.jsx";
-
-const STATUS_WAITING = "Waiting to start";
-const STATUS_IN_PROGRESS = "In progress";
-const STATUS_FINISHED = "Finished";
+import { GameStatus } from "./gameStatus.js";
 
 function resolveWinner(p1Score, p2Score) {
     if (p1Score > p2Score) {
@@ -26,8 +23,7 @@ export default function App() {
     const [p2Score, setP2Score] = React.useState(0);
     const [p1Character, setP1Character] = React.useState(null);
     const [p2Character, setP2Character] = React.useState(null);
-    const [started, setStarted] = React.useState(false);
-    const [finished, setFinished] = React.useState(false);
+    const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
 
     // Imperative bridge used by the Playwright driver (see game.py).
     React.useEffect(() => {
@@ -38,20 +34,13 @@ export default function App() {
             setCurrentRound: value => setCurrentRound(Number(value)),
             addP1Score: value => setP1Score(score => score + Number(value)),
             addP2Score: value => setP2Score(score => score + Number(value)),
-            startGame: () => setStarted(true),
-            finishGame: () => setFinished(true),
+            startGame: () => setGameStatus(GameStatus.IN_PROGRESS),
+            finishGame: () => setGameStatus(GameStatus.FINISHED),
         };
         return () => {
             delete window.gameApi;
         };
     }, []);
-
-    let status = STATUS_WAITING;
-    if (finished) {
-        status = STATUS_FINISHED;
-    } else if (started) {
-        status = STATUS_IN_PROGRESS;
-    }
 
     return (
         <div className="container">
@@ -62,23 +51,23 @@ export default function App() {
                              score={p1Score}
                              character={p1Character}
                              onSelectCharacter={setP1Character}
-                             showSelector={!started}/>
+                             gameStatus={gameStatus}/>
                 <PlayerPanel player="p2"
                              label="Player 2"
                              name={p2Name}
                              score={p2Score}
                              character={p2Character}
                              onSelectCharacter={setP2Character}
-                             showSelector={!started}/>
+                             gameStatus={gameStatus}/>
             </div>
             <InfoPanel currentRound={currentRound === null ? 0 : currentRound + 1}
                        rounds={rounds}
-                       status={status}
-                       winner={finished ? resolveWinner(p1Score, p2Score) : null}/>
+                       gameStatus={gameStatus}
+                       winner={gameStatus === GameStatus.FINISHED ? resolveWinner(p1Score, p2Score) : null}/>
             <div className="start-container">
-                <button className="start-button" disabled={started} onClick={() => setStarted(true)}>Fight!</button>
+                <button className="start-button" disabled={gameStatus !== GameStatus.WAITING} onClick={() => setGameStatus(GameStatus.IN_PROGRESS)}>Fight!</button>
             </div>
-            {started && <div className="game-started"/>}
+            {gameStatus === GameStatus.IN_PROGRESS && <div className="game-started"/>}
         </div>
     );
 }

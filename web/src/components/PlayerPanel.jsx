@@ -1,8 +1,9 @@
 import React from "react";
 
 import CharacterSelector from "./CharacterSelector.jsx";
+import { GameStatus } from "../gameStatus.js";
 
-export default function PlayerPanel({ player, label, name, score, character, onSelectCharacter, showSelector }) {
+export default function PlayerPanel({ player, label, name, score, character, onSelectCharacter, gameStatus }) {
     return (
         <div className="player-container">
             <div className="player-name">
@@ -10,7 +11,7 @@ export default function PlayerPanel({ player, label, name, score, character, onS
                 <span className={`${player}-name`}>{name}</span>
             </div>
             <div className={`player-score ${player}-score`}>{score.toLocaleString("en-US")}</div>
-            {showSelector && (
+            {gameStatus === GameStatus.WAITING && (
                 <div className="player-character-container">
                     <CharacterSelector player={player} onSelect={onSelectCharacter}/>
                     <div className="character-name">

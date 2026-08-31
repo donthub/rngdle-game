@@ -14,6 +14,16 @@ function addBadge(badge, characterRef, setAction) {
     });
 }
 
+function handleOnSelectCharacter(character, playerSelection, setPlayerSelection, setP1Character, setP2Character) {
+    if (playerSelection === "P1") {
+        setP1Character(character);
+        setPlayerSelection("P2");
+    } else if (playerSelection === "P2") {
+        setP2Character(character);
+        setPlayerSelection("P1");
+    }
+}
+
 function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
@@ -26,6 +36,7 @@ function Game({ onReset }) {
     const [p1Action, setP1Action] = React.useState(null);
     const [p2Action, setP2Action] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
+    const [playerSelection, setPlayerSelection] = React.useState("P1");
 
     const gameStatusRef = React.useRef(gameStatus);
     gameStatusRef.current = gameStatus;
@@ -81,15 +92,18 @@ function Game({ onReset }) {
         onSelectCharacter: setP2Character,
         action: p2Action,
     };
+    const onCharacterSelect = character => handleOnSelectCharacter(character, playerSelection, setPlayerSelection, setP1Character, setP2Character);
+    const onStart = () => setGameStatus(GameStatus.IN_PROGRESS);
     const onExit = () => setGameStatus(GameStatus.EXITED);
 
     if (gameStatus === GameStatus.WAITING) {
         return <WaitingPage gameStatus={gameStatus}
                             rounds={rounds}
                             onRoundsChange={setRounds}
+                            onSelectCharacter={onCharacterSelect}
                             p1={p1}
                             p2={p2}
-                            onStart={() => setGameStatus(GameStatus.IN_PROGRESS)}
+                            onStart={onStart}
                             onExit={onExit}/>;
     }
 

@@ -17,27 +17,27 @@ function resolveWinner(p1Score, p2Score) {
 export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2, onReset, onExit }) {
     const winner = resolveWinner(p1.score, p2.score);
     return (
-        <div className="container">
-            <div className="main-container">
-                <div className="player-container">
+        <div className="flex-col">
+            <div className="flex-row w-100">
+                <div className="flex-col w-100">
                     <PlayerNameScorePanel player="p1" label="Player 1" {...p1}/>
                 </div>
-                <div className="info-container">
+                <div className="flex-col">
                     <InfoRounds currentRound={currentRound} rounds={rounds} />
                     <InfoStatus gameStatus={gameStatus}/>
-                    <div className="winner-container" style={{ color: winner.color }}>
+                    <div className="flex winner-container" style={{ color: winner.color }}>
                         {winner.text}
                     </div>
                 </div>
-                <div className="player-container">
+                <div className="flex-col w-100">
                     <PlayerNameScorePanel player="p2" label="Player 2" {...p2}/>
                 </div>
             </div>
-            <div className="controls-container">
-                <div className="reset-container">
+            <div className="flex-row">
+                <div className="flex">
                     <button className="reset-button" onClick={onReset}>Reset</button>
                 </div>
-                <div className="exit-container">
+                <div className="flex">
                     <button className="exit-button" onClick={onExit}>Exit</button>
                 </div>
             </div>

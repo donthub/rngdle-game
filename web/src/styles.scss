@@ -8,35 +8,32 @@ $player-colors: (
 );
 
 // Font sizes
-$font-size-status: 18px;
-$font-size-button: 18px;
-$font-size-rounds: 24px;
 $font-size-player-name: 36px;
 $font-size-player-score: 48px;
 $font-size-winner: 64px;
 
 // Metrics
-$info-row-gap: 10px;
-$portrait-height: 180px;
+$portrait-height: 350px;
+$nameplate-height: 40px;
 $action-height: 350px;
 $action-fade-duration: 200ms;
 
-.container {
+.flex {
     display: flex;
-    flex-direction: column;
-    width: 100%;
 }
 
-.main-container {
+.flex-col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.flex-row {
     display: flex;
     flex-direction: row;
-    justify-content: space-around;
 }
 
-.player-container {
-    display: flex;
-    flex-direction: column;
-    text-align: center;
+.w-100 {
     width: 100%;
 }
 
@@ -60,6 +57,7 @@ $action-fade-duration: 200ms;
     align-items: center;
     justify-content: center;
     height: $action-height;
+    width: 100%;
 
     img {
         max-height: $action-height;
@@ -101,78 +99,17 @@ $action-fade-duration: 200ms;
     transform: scale(-1, 1);
 }
 
-.info-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    row-gap: $info-row-gap;
-    white-space: nowrap;
-    align-items: center;
-}
-
-.info-rounds {
-    font-size: $font-size-rounds;
-}
-
-.total-rounds {
-    display: flex;
-}
-
-.current-rounds {
-    display: flex;
-}
-
-.info-status {
-    display: flex;
-    flex-direction: column;
-    font-size: $font-size-status;
-    white-space-collapse: break-spaces;
-    align-items: center;
-}
-
 .winner-container {
     display: flex;
     font-size: $font-size-winner;
     justify-content: center;
 }
 
-.start-container {
-    display: flex;
-    justify-content: center;
-}
-
-.start-button {
-    font-size: $font-size-button;
-}
-
-.controls-container {
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-}
-
-.reset-container {
-    display: flex;
-}
-
-.exit-container {
-    display: flex;
-}
-
-.player-character-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
 .player-character-portrait {
     display: flex;
-
-    img {
-        height: $portrait-height;
-    }
+    height: $portrait-height;
 }
 
-.player-character-selector {
-    display: flex;
+.player-character-nameplate {
+    height: $nameplate-height;
 }

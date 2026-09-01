@@ -4,6 +4,8 @@ from pathlib import Path
 
 import game
 
+CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
+
 
 def setup_logging(log_file: str = "app.log", level=logging.INFO) -> None:
     logging.basicConfig(
@@ -16,11 +18,11 @@ def setup_logging(log_file: str = "app.log", level=logging.INFO) -> None:
     )
 
 
-setup_logging()
+def main():
+    setup_logging()
+    config = json.loads(CONFIG_PATH.read_text(encoding="utf-8"))
+    game.run(config)
 
-logger = logging.getLogger(__name__)
 
-config_path = Path(__file__).resolve().parent / "config.json"
-config = json.loads(config_path.read_text(encoding="utf-8"))
-
-game.run(config)
+if __name__ == "__main__":
+    main()

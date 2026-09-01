@@ -1,4 +1,3 @@
-import React from "react";
 import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
 import InfoRounds from "../components/InfoRounds.jsx";
 import InfoStatus from "../components/InfoStatus.jsx";
@@ -17,7 +16,7 @@ export default function InProgressPage({ gameStatus, currentRound, rounds, p1, p
             </div>
             <div className="flex-col w-100">
                 <PlayerNameScorePanel player="p2" label="Player 2" {...p2}/>
-                <PlayerActionPanel player="p2"  {...p2}/>
+                <PlayerActionPanel player="p2" {...p2}/>
             </div>
         </div>
     );

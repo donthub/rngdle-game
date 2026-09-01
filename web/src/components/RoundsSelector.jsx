@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function RoundsSelector({ rounds, onRoundsChange }) {
     return (
         <div className="flex">

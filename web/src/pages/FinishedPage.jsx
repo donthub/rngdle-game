@@ -1,17 +1,15 @@
-import React from "react";
-
 import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
 import InfoRounds from "../components/InfoRounds.jsx";
 import InfoStatus from "../components/InfoStatus.jsx";
 
 function resolveWinner(p1Score, p2Score) {
     if (p1Score > p2Score) {
-        return { text: "Player 1 wins!", color: "red" };
+        return { text: "Player 1 wins!", className: "winner-p1" };
     }
     if (p2Score > p1Score) {
-        return { text: "Player 2 wins!", color: "blue" };
+        return { text: "Player 2 wins!", className: "winner-p2" };
     }
-    return { text: "Draw!", color: "gray" };
+    return { text: "Draw!", className: "winner-draw" };
 }
 
 export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2, onReset, onExit }) {
@@ -23,9 +21,9 @@ export default function FinishedPage({ gameStatus, currentRound, rounds, p1, p2,
                     <PlayerNameScorePanel player="p1" label="Player 1" {...p1}/>
                 </div>
                 <div className="flex-col">
-                    <InfoRounds currentRound={currentRound} rounds={rounds} />
+                    <InfoRounds currentRound={currentRound} rounds={rounds}/>
                     <InfoStatus gameStatus={gameStatus}/>
-                    <div className="flex winner-container" style={{ color: winner.color }}>
+                    <div className={`flex winner-container ${winner.className}`}>
                         {winner.text}
                     </div>
                 </div>

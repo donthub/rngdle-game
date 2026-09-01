@@ -1,100 +1,105 @@
 import logging
 import queue
-import tempfile
 import threading
 import time
 
 from playwright.sync_api import sync_playwright, Page
 
+import browser
+from game_api import GameApi
+
 logger = logging.getLogger(__name__)
 
+RNGDLE_URL = "https://rngdle.com"
+RNGDLE_THEME = "Dark"
 
-def start_round(game_page: Page, p1_result: dict, p2_result: dict):
-    p1_ready, p2_ready = threading.Event(), threading.Event()
-    roll_event = threading.Event()
-    p1_score, p2_score = threading.Event(), threading.Event()
-    stop_event = threading.Event()
+PLAYER_WINDOW_POSITIONS = {
+    "p1": (-10, 480),
+    "p2": (952, 480),
+}
+PLAYER_WINDOW_SIZE = (978, 610)
+
+RESULT_DISPLAY_SECONDS = 3
+BADGE_POLL_SECONDS = 0.1
+
+RESULT_PANEL = "main > div:nth-of-type(1)"
+SCORE_PANEL = f"{RESULT_PANEL} > div:nth-of-type(3)"
+SCORE_TEXT = f"{SCORE_PANEL} > div:nth-of-type(1)"
+LIFETIME_EP = f"{SCORE_PANEL} > div:nth-of-type(2)"
+BADGE_PANEL = f"{RESULT_PANEL} > div:nth-of-type(4)"
+BADGE_PANEL_TITLE = f"{BADGE_PANEL} > div:nth-of-type(1)"
+BADGE_LIST = ".space-y-3"
+BADGE_RARITY = "> div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)"
+
+THEME_BUTTON = f"[title='{RNGDLE_THEME}']"
+ROLL_BUTTON = "[aria-label='Generate a new number']"
+SCORE_READY = "[aria-label='Copy to clipboard']"
+
+
+def start_round(game_api: GameApi) -> dict:
+    roll_event, stop_event = threading.Event(), threading.Event()
     badge_queue = queue.Queue()
+    scores = {}
+    ready_events, score_events, threads = {}, {}, {}
 
-    t1 = threading.Thread(
-        target=player_game,
-        kwargs=dict(
-            player="p1",
-            mode="Dark",
-            size=(978, 610),
-            position=(-10, 480),
-            result_holder=p1_result,
-            badge_queue=badge_queue,
-            ready_event=p1_ready,
-            roll_event=roll_event,
-            score_event=p1_score,
-            stop_event=stop_event
-        ),
-        daemon=True,
-    )
-    t2 = threading.Thread(
-        target=player_game,
-        kwargs=dict(
-            player="p2",
-            mode="Dark",
-            size=(978, 610),
-            position=(952, 480),
-            result_holder=p2_result,
-            badge_queue=badge_queue,
-            ready_event=p2_ready,
-            roll_event=roll_event,
-            score_event=p2_score,
-            stop_event=stop_event
-        ),
-        daemon=True,
-    )
+    for player, position in PLAYER_WINDOW_POSITIONS.items():
+        ready_events[player] = threading.Event()
+        score_events[player] = threading.Event()
+        threads[player] = threading.Thread(
+            target=player_round,
+            kwargs=dict(
+                player=player,
+                position=position,
+                scores=scores,
+                badge_queue=badge_queue,
+                ready_event=ready_events[player],
+                roll_event=roll_event,
+                score_event=score_events[player],
+                stop_event=stop_event,
+            ),
+            daemon=True,
+        )
+        threads[player].start()
 
-    t1.start()
-    t2.start()
-
-    p1_ready.wait()
-    p2_ready.wait()
-    logger.info("Both pages ready")
+    for ready_event in ready_events.values():
+        ready_event.wait()
+    logger.info("All pages ready")
 
     roll_event.set()
 
-    wait_for_event_add_pending_badges(p1_score, game_page, badge_queue)
-    logger.info(f"P1 score: {p1_result['score']}")
-    wait_for_event_add_pending_badges(p2_score, game_page, badge_queue)
-    logger.info(f"P2 score: {p2_result['score']}")
+    for player, score_event in score_events.items():
+        wait_for_score(score_event, game_api, badge_queue)
+        logger.info(f"[{player}] Score: {scores[player]}")
 
-    time.sleep(3)
+    time.sleep(RESULT_DISPLAY_SECONDS)
 
     stop_event.set()
-    t1.join()
-    t2.join()
-    add_pending_badges(game_page, badge_queue)
+    for thread in threads.values():
+        thread.join()
+    drain_badge_queue(game_api, badge_queue)
+
+    return {player: scores[player] for player in PLAYER_WINDOW_POSITIONS}
 
 
-def wait_for_event_add_pending_badges(event: threading.Event, game_page: Page, badge_queue: queue.Queue):
-    while not event.wait(0.05):
-        add_pending_badges(game_page, badge_queue)
-    add_pending_badges(game_page, badge_queue)
+def wait_for_score(score_event: threading.Event, game_api: GameApi, badge_queue: queue.Queue):
+    while not score_event.wait(BADGE_POLL_SECONDS):
+        drain_badge_queue(game_api, badge_queue)
+    drain_badge_queue(game_api, badge_queue)
 
 
-def add_pending_badges(game_page: Page, badge_queue: queue.Queue):
+def drain_badge_queue(game_api: GameApi, badge_queue: queue.Queue):
     while True:
         try:
             player, badge_rarity = badge_queue.get_nowait()
         except queue.Empty:
             return
-        if player == "p1":
-            game_page.evaluate("badge => window.gameApi.addP1Badge(badge)", badge_rarity)
-        elif player == "p2":
-            game_page.evaluate("badge => window.gameApi.addP2Badge(badge)", badge_rarity)
+        game_api.add_badge(player, badge_rarity)
 
 
-def player_game(
+def player_round(
         player: str,
-        mode: str,
-        size: tuple,
         position: tuple,
-        result_holder: dict,
+        scores: dict,
         badge_queue: queue.Queue,
         ready_event: threading.Event,
         roll_event: threading.Event,
@@ -102,73 +107,55 @@ def player_game(
         stop_event: threading.Event
 ):
     with sync_playwright() as playwright:
-        user_data_dir = tempfile.mkdtemp()
-        x, y = position
-        width, height = size
-        context = playwright.chromium.launch_persistent_context(
-            user_data_dir=user_data_dir,
-            headless=False,
-            no_viewport=True,
-            args=[
-                "--app=https://rngdle.com",
-                f"--window-position={x},{y}",
-                f"--window-size={width},{height}",
-            ],
-        )
-        page = context.pages[0] if context.pages else context.new_page()
+        context, page = browser.launch_app_window(playwright, RNGDLE_URL, position, PLAYER_WINDOW_SIZE)
 
-        page.wait_for_selector(f"[title='{mode}']").click()
-        page.locator("header").evaluate("element => element.remove()")
-        result_holder["page"] = page
+        page.locator(THEME_BUTTON).click()
+        remove_element(page, "header")
         ready_event.set()  # signal that this page is ready
 
         roll_event.wait()
 
-        page.query_selector("[aria-label='Generate a new number']").click()
+        page.locator(ROLL_BUTTON).click()
 
         page.get_by_text("Badge breakdown").wait_for(timeout=0)
-        # Remove "Badge breakdown element"
-        page.locator("main").locator("> div").nth(0).locator("> div").nth(3).locator("> div").nth(0).evaluate(
-            "element => element.remove()")
+        remove_element(page, BADGE_PANEL_TITLE)
 
-        process_badges(page, badge_queue, player)
+        collect_badges(page, badge_queue, player)
 
-        page.wait_for_selector("[aria-label='Copy to clipboard']")
-        score = page.locator("main").locator("> div").nth(0).locator("> div").nth(2).locator("> div").nth(
-            0).text_content()
-
-        # Remove "Lifetime EP" element
-        page.locator("main").locator("> div").nth(0).locator("> div").nth(2).locator("> div").nth(1).evaluate(
-            "element => element.remove()")
-        # Remove "Share" element
-        page.locator("main").locator("> div").nth(0).locator("> div").nth(3).evaluate("element => element.remove()")
-
-        result_holder["score"] = score.replace(",", "").replace(" ", "").replace("EP", "")
+        page.wait_for_selector(SCORE_READY)
+        score_content = page.locator(SCORE_TEXT).text_content()
+        scores[player] = parse_score(score_content)
+        remove_element(page, LIFETIME_EP)
+        remove_element(page, BADGE_PANEL)
         score_event.set()
 
         stop_event.wait()
         context.close()
 
-def process_badges(page: Page, badge_queue: queue.Queue, player: str):
-    processed_badges_count = 0
-    is_processing = True
-    while is_processing:
-        badges_container = page.locator(".space-y-3")
-        if badges_container:
-            badges_elements = badges_container.locator("> div")
-            badges_elements_count = badges_elements.count()
-            while processed_badges_count < badges_elements_count:
-                badge_rarity = (badges_elements.nth(badges_elements_count - processed_badges_count - 1)
-                                .locator("> div").nth(0)
-                                .locator("> div").nth(0)
-                                .locator("> div").nth(0)
-                                .locator("> span").nth(2).text_content())
-                logger.info(f"[{player}] Badge rarity: {badge_rarity}")
-                badge_queue.put((player, badge_rarity))
-                processed_badges_count += 1
 
-            score_element = page.locator("[aria-label='Copy to clipboard']")
-            if score_element.count() > 0:
-                return
+def collect_badges(page: Page, badge_queue: queue.Queue, player: str):
+    """Queues the rarity of every badge as it appears, and returns once the score is ready."""
+    collected_count = 0
+    while True:
+        badges = page.locator(BADGE_LIST).locator("> div")
+        badges_count = badges.count()
+        while collected_count < badges_count:
+            # Badges are prepended, so the list is walked backwards to queue them in the order they were rolled
+            badge = badges.nth(badges_count - collected_count - 1)
+            badge_rarity = badge.locator(BADGE_RARITY).text_content()
+            logger.info(f"[{player}] Badge rarity: {badge_rarity}")
+            badge_queue.put((player, badge_rarity))
+            collected_count += 1
 
-        time.sleep(0.1)
+        if page.locator(SCORE_READY).count() > 0:
+            return
+
+        time.sleep(BADGE_POLL_SECONDS)
+
+
+def parse_score(score_text: str) -> str:
+    return score_text.replace(",", "").replace(" ", "").replace("EP", "")
+
+
+def remove_element(page: Page, selector: str):
+    page.locator(selector).evaluate("element => element.remove()")

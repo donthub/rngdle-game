@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function InfoStatus({ gameStatus }) {
     return (
         <div className="flex">

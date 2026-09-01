@@ -1,14 +1,20 @@
 // Colors
 $color-p1: red;
 $color-p2: blue;
+$color-draw: gray;
 
 $player-colors: (
     "p1": $color-p1,
     "p2": $color-p2
 );
 
+$winner-colors: (
+    "p1": $color-p1,
+    "p2": $color-p2,
+    "draw": $color-draw
+);
+
 // Font sizes
-$font-size-player-name: 36px;
 $font-size-player-score: 48px;
 $font-size-winner: 64px;
 
@@ -35,10 +41,6 @@ $action-fade-duration: 200ms;
 
 .w-100 {
     width: 100%;
-}
-
-.player-name {
-    font-size: $font-size-player-name;
 }
 
 @each $player, $color in $player-colors {
@@ -103,6 +105,12 @@ $action-fade-duration: 200ms;
     display: flex;
     font-size: $font-size-winner;
     justify-content: center;
+}
+
+@each $winner, $color in $winner-colors {
+    .winner-#{$winner} {
+        color: $color;
+    }
 }
 
 .player-character-portrait {

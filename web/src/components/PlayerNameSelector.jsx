@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function PlayerNameSelector({ label, name, onNameChange }) {
     return (
         <div className="flex">

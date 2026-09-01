@@ -1,4 +1,3 @@
-import React from "react";
 import InfoStatus from "../components/InfoStatus.jsx";
 import CharacterSelector from "../components/CharacterSelector.jsx";
 import PlayerNameSelector from "../components/PlayerNameSelector.jsx";

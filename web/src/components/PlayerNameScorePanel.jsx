@@ -1,5 +1,3 @@
-import React from "react";
-
 export default function PlayerNameScorePanel({ player, label, name, score }) {
     return (
         <div className="flex-col">

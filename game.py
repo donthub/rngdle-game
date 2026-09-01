@@ -1,60 +1,51 @@
 import logging
-import tempfile
 
 from playwright.sync_api import sync_playwright
 
+import browser
 import web_server
+from game_api import GameApi
 from game_round import start_round
 
 logger = logging.getLogger(__name__)
+
+WINDOW_POSITION = (-10, -30)
+WINDOW_SIZE = (1940, 520)
 
 
 def run(config: dict):
     logger.info(f"Config: {config}")
 
-    x, y = (-10, -30)
-    width, height = (1940, 520)
-
-    user_data_dir = tempfile.mkdtemp()
     with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:
-        context = playwright.chromium.launch_persistent_context(
-            user_data_dir=user_data_dir,
-            headless=False,
-            no_viewport=True,
-            args=[
-                f"--app={server.url}",  # removes tabs/address bar
-                f"--window-position={x},{y}",
-                f"--window-size={width},{height}",
-            ],
-        )
-        page = context.pages[0] if context.pages else context.new_page()
+        context, page = browser.launch_app_window(playwright, server.url, WINDOW_POSITION, WINDOW_SIZE)
         page.goto(server.url)
 
-        page.wait_for_function("() => window.gameApi !== undefined")
+        game_api = GameApi(page)
+        game_api.wait_until_ready()
 
-        is_exited = False
-        while not is_exited:
-            page.wait_for_function("() => window.gameApi.isStarted() || window.gameApi.isExited()", timeout=0)
-            is_exited = page.evaluate("() => window.gameApi.isExited()")
-            if is_exited:
+        while True:
+            game_api.wait_until_started_or_exited()
+            if game_api.is_exited():
                 break
 
-            p1_name = page.evaluate("() => window.gameApi.getP1Name()")
-            p2_name = page.evaluate("() => window.gameApi.getP2Name()")
-            rounds = int(page.evaluate("() => window.gameApi.getRounds()"))
-            logger.info(f"P1 name: {p1_name}")
-            logger.info(f"P2 name: {p2_name}")
-            logger.info(f"Rounds: {rounds}")
-
-            for i in range(rounds):
-                page.evaluate("round => window.gameApi.setCurrentRound(round)", i)
-                p1_result, p2_result = {}, {}
-                start_round(page, p1_result, p2_result)
-                page.evaluate("score => window.gameApi.addP1Score(score)", p1_result["score"])
-                page.evaluate("score => window.gameApi.addP2Score(score)", p2_result["score"])
-
-            page.evaluate("() => window.gameApi.finishGame()")
-            page.wait_for_function("() => !window.gameApi.isFinished()", timeout=0)
-            is_exited = page.evaluate("() => window.gameApi.isExited()")
+            play_game(game_api)
+            if game_api.is_exited():
+                break
 
         context.close()
+
+
+def play_game(game_api: GameApi):
+    logger.info(f"P1 name: {game_api.get_name('p1')}")
+    logger.info(f"P2 name: {game_api.get_name('p2')}")
+
+    rounds = game_api.get_rounds()
+    logger.info(f"Rounds: {rounds}")
+
+    for round_index in range(rounds):
+        game_api.set_current_round(round_index)
+        for player, score in start_round(game_api).items():
+            game_api.add_score(player, score)
+
+    game_api.finish_game()
+    game_api.wait_until_not_finished()

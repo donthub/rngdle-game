@@ -29,3 +29,7 @@ export const Character = Object.freeze({
   KY: { id: "ky", name: "Ky Kiske", coords: "405,25,405,51,381,74,332,74,332,48,356,25" },
   ROBOKY: { id: "roboky", name: "Robo-Ky", coords: "482,0,482,26,457,49,407,49,407,23,431,0" },
 });
+
+export function characterAssetUrl(character, asset) {
+    return `/assets/${character.id}/${asset}.png`;
+}

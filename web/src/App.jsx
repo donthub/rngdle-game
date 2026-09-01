@@ -6,61 +6,49 @@ import WaitingPage from "./pages/WaitingPage.jsx";
 import { resolveBadgeMoveImage } from "./badges.js";
 import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
+import useLatestRef from "./useLatestRef.js";
 
-function addBadge(badge, characterRef, setAction) {
-    setAction(previousImage => {
-        const image = resolveBadgeMoveImage(badge, characterRef.current, previousImage);
-        return image === null ? previousImage : image;
-    });
-}
+function usePlayer(defaultCharacter) {
+    const [name, setName] = React.useState("");
+    const [score, setScore] = React.useState(0);
+    const [character, setCharacter] = React.useState(defaultCharacter);
+    const [action, setAction] = React.useState(null);
 
-function handleOnSelectCharacter(character, playerSelection, setPlayerSelection, setP1Character, setP2Character) {
-    if (playerSelection === "P1") {
-        setP1Character(character);
-        setPlayerSelection("P2");
-    } else if (playerSelection === "P2") {
-        setP2Character(character);
-        setPlayerSelection("P1");
-    }
+    const nameRef = useLatestRef(name);
+    const characterRef = useLatestRef(character);
+
+    return {
+        state: { name, score, character, action, onNameChange: setName },
+        setCharacter,
+        getName: () => nameRef.current,
+        addScore: value => setScore(previousScore => previousScore + Number(value)),
+        addBadge: badge => setAction(previousImage =>
+            resolveBadgeMoveImage(badge, characterRef.current, previousImage) ?? previousImage),
+    };
 }
 
 function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
-    const [p1Name, setP1Name] = React.useState("");
-    const [p2Name, setP2Name] = React.useState("");
-    const [p1Score, setP1Score] = React.useState(0);
-    const [p2Score, setP2Score] = React.useState(0);
-    const [p1Character, setP1Character] = React.useState(Character.SOL);
-    const [p2Character, setP2Character] = React.useState(Character.KY);
-    const [p1Action, setP1Action] = React.useState(null);
-    const [p2Action, setP2Action] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
-    const [playerSelection, setPlayerSelection] = React.useState("P1");
+    const [selectedPlayerIndex, setSelectedPlayerIndex] = React.useState(0);
 
-    const gameStatusRef = React.useRef(gameStatus);
-    gameStatusRef.current = gameStatus;
-    const roundsRef = React.useRef(rounds);
-    roundsRef.current = rounds;
-    const p1NameRef = React.useRef(p1Name);
-    p1NameRef.current = p1Name;
-    const p2NameRef = React.useRef(p2Name);
-    p2NameRef.current = p2Name;
-    const p1CharacterRef = React.useRef(p1Character);
-    p1CharacterRef.current = p1Character;
-    const p2CharacterRef = React.useRef(p2Character);
-    p2CharacterRef.current = p2Character;
+    const p1 = usePlayer(Character.SOL);
+    const p2 = usePlayer(Character.KY);
+    const players = [p1, p2];
+
+    const gameStatusRef = useLatestRef(gameStatus);
+    const roundsRef = useLatestRef(rounds);
 
     // Imperative bridge used by the Playwright driver (see game.py).
     React.useEffect(() => {
         window.gameApi = {
             // Setters
             setCurrentRound: value => setCurrentRound(Number(value)),
-            addP1Score: value => setP1Score(score => score + Number(value)),
-            addP2Score: value => setP2Score(score => score + Number(value)),
-            addP1Badge: value => addBadge(value, p1CharacterRef, setP1Action),
-            addP2Badge: value => addBadge(value, p2CharacterRef, setP2Action),
-            startGame: () => setGameStatus(GameStatus.IN_PROGRESS),
+            addP1Score: value => p1.addScore(value),
+            addP2Score: value => p2.addScore(value),
+            addP1Badge: value => p1.addBadge(value),
+            addP2Badge: value => p2.addBadge(value),
             finishGame: () => setGameStatus(GameStatus.FINISHED),
 
             // Getters
@@ -68,60 +56,48 @@ function Game({ onReset }) {
             isFinished: () => gameStatusRef.current === GameStatus.FINISHED,
             isExited: () => gameStatusRef.current === GameStatus.EXITED,
             getRounds: () => roundsRef.current,
-            getP1Name: () => p1NameRef.current,
-            getP2Name: () => p2NameRef.current,
+            getP1Name: () => p1.getName(),
+            getP2Name: () => p2.getName(),
         };
         return () => {
             delete window.gameApi;
         };
     }, []);
 
-    const p1 = {
-        name: p1Name,
-        onNameChange: setP1Name,
-        score: p1Score,
-        character: p1Character,
-        onSelectCharacter: setP1Character,
-        action: p1Action,
+    const onSelectCharacter = character => {
+        players[selectedPlayerIndex].setCharacter(character);
+        setSelectedPlayerIndex(index => (index + 1) % players.length);
     };
-    const p2 = {
-        name: p2Name,
-        onNameChange: setP2Name,
-        score: p2Score,
-        character: p2Character,
-        onSelectCharacter: setP2Character,
-        action: p2Action,
-    };
-    const onCharacterSelect = character => handleOnSelectCharacter(character, playerSelection, setPlayerSelection, setP1Character, setP2Character);
     const onStart = () => setGameStatus(GameStatus.IN_PROGRESS);
     const onExit = () => setGameStatus(GameStatus.EXITED);
+    const displayedRound = currentRound === null ? 0 : currentRound + 1;
 
     if (gameStatus === GameStatus.WAITING) {
         return <WaitingPage gameStatus={gameStatus}
                             rounds={rounds}
                             onRoundsChange={setRounds}
-                            onSelectCharacter={onCharacterSelect}
-                            p1={p1}
-                            p2={p2}
+                            onSelectCharacter={onSelectCharacter}
+                            p1={p1.state}
+                            p2={p2.state}
                             onStart={onStart}
                             onExit={onExit}/>;
     }
 
     if (gameStatus === GameStatus.FINISHED) {
         return <FinishedPage gameStatus={gameStatus}
-                             currentRound={currentRound === null ? 0 : currentRound + 1}
+                             currentRound={displayedRound}
                              rounds={rounds}
-                             p1={p1}
-                             p2={p2}
+                             p1={p1.state}
+                             p2={p2.state}
                              onReset={onReset}
                              onExit={onExit}/>;
     }
 
     return <InProgressPage gameStatus={gameStatus}
-                           currentRound={currentRound === null ? 0 : currentRound + 1}
+                           currentRound={displayedRound}
                            rounds={rounds}
-                           p1={p1}
-                           p2={p2}/>;
+                           p1={p1.state}
+                           p2={p2.state}/>;
 }
 
 export default function App() {

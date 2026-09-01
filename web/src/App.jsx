@@ -39,13 +39,14 @@ function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
-    const [destroyed, setDestroyed] = React.useState(false);
+    const [destroyers, setDestroyers] = React.useState([]);
     const [finishRequested, setFinishRequested] = React.useState(false);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = React.useState(0);
 
     const p1 = usePlayer(Character.SOL);
     const p2 = usePlayer(Character.KY);
-    const players = [p1, p2];
+    const playersByKey = { p1, p2 };
+    const players = PLAYER_KEYS.map(playerKey => playersByKey[playerKey]);
 
     // The last round's score is still counting up when the driver finishes the
     // game, so hold the result page back until both totals have landed.
@@ -62,13 +63,16 @@ function Game({ onReset }) {
 
     // A game ending badge stops the driver after the current round (see game_round.py),
     // so the round meter is cut back to make that round the last one, and the loser is
-    // marked as destroyed on the result page.
-    const addBadge = (player, badge) => {
-        player.addBadge(badge);
+    // marked as destroyed on the result page. Whoever rolled one is remembered, because a
+    // lone destroyer takes the game whatever the scores say (see FinishedPage.jsx).
+    const addBadge = (playerKey, badge) => {
+        playersByKey[playerKey].addBadge(badge);
         if (!isGameEndingBadge(badge)) {
             return;
         }
-        setDestroyed(true);
+        setDestroyers(previousDestroyers => previousDestroyers.includes(playerKey)
+            ? previousDestroyers
+            : [...previousDestroyers, playerKey]);
         if (currentRoundRef.current !== null) {
             setRounds(previousRounds => Math.min(previousRounds, currentRoundRef.current + 1));
         }
@@ -81,8 +85,8 @@ function Game({ onReset }) {
             setCurrentRound: value => setCurrentRound(Number(value)),
             addP1Score: value => p1.addScore(value),
             addP2Score: value => p2.addScore(value),
-            addP1Badge: value => addBadge(p1, value),
-            addP2Badge: value => addBadge(p2, value),
+            addP1Badge: value => addBadge("p1", value),
+            addP2Badge: value => addBadge("p2", value),
             finishGame: () => setFinishRequested(true),
 
             // Getters
@@ -121,7 +125,7 @@ function Game({ onReset }) {
                              rounds={rounds}
                              p1={p1.state}
                              p2={p2.state}
-                             destroyed={destroyed}
+                             destroyers={destroyers}
                              onReset={onReset}
                              onExit={onExit}/>;
     } else {

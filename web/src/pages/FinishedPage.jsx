@@ -3,12 +3,22 @@ import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
-function resolveWinner(p1Score, p2Score) {
+const WINNERS = Object.freeze({
+    p1: { subject: "Player 1", predicate: "wins!", className: "winner-p1", player: "p1" },
+    p2: { subject: "Player 2", predicate: "wins!", className: "winner-p2", player: "p2" },
+});
+
+// A game ending badge is rare enough that rolling one alone takes the game, however the
+// scores landed; if both sides rolled one the scores settle it as usual (see badges.js).
+function resolveWinner(p1Score, p2Score, destroyers) {
+    if (destroyers.length === 1) {
+        return WINNERS[destroyers[0]];
+    }
     if (p1Score > p2Score) {
-        return { subject: "Player 1", predicate: "wins!", className: "winner-p1", player: "p1" };
+        return WINNERS.p1;
     }
     if (p2Score > p1Score) {
-        return { subject: "Player 2", predicate: "wins!", className: "winner-p2", player: "p2" };
+        return WINNERS.p2;
     }
     return { subject: "Draw!", predicate: null, className: "winner-draw", player: null };
 }
@@ -36,8 +46,9 @@ function ResultColumn({ player, state, winner, destroyed }) {
     );
 }
 
-export default function FinishedPage({ currentRound, rounds, p1, p2, destroyed, onReset, onExit }) {
-    const winner = resolveWinner(p1.score, p2.score);
+export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers, onReset, onExit }) {
+    const winner = resolveWinner(p1.score, p2.score, destroyers);
+    const destroyed = destroyers.length > 0;
     return (
         <>
             <ResultColumn player="p1" state={p1} winner={winner} destroyed={destroyed}/>

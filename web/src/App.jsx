@@ -39,6 +39,7 @@ function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
+    const [destroyed, setDestroyed] = React.useState(false);
     const [finishRequested, setFinishRequested] = React.useState(false);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = React.useState(0);
 
@@ -60,10 +61,15 @@ function Game({ onReset }) {
     const currentRoundRef = useLatestRef(currentRound);
 
     // A game ending badge stops the driver after the current round (see game_round.py),
-    // so the round meter is cut back to make that round the last one.
+    // so the round meter is cut back to make that round the last one, and the loser is
+    // marked as destroyed on the result page.
     const addBadge = (player, badge) => {
         player.addBadge(badge);
-        if (isGameEndingBadge(badge) && currentRoundRef.current !== null) {
+        if (!isGameEndingBadge(badge)) {
+            return;
+        }
+        setDestroyed(true);
+        if (currentRoundRef.current !== null) {
             setRounds(previousRounds => Math.min(previousRounds, currentRoundRef.current + 1));
         }
     };
@@ -115,6 +121,7 @@ function Game({ onReset }) {
                              rounds={rounds}
                              p1={p1.state}
                              p2={p2.state}
+                             destroyed={destroyed}
                              onReset={onReset}
                              onExit={onExit}/>;
     } else {

@@ -96,6 +96,9 @@ $roster-width: 660px;
 $roster-height: 177px;
 $stage-floor-offset: 36px;
 $stage-floor-width: 460px;
+$destroyed-width: 360px;
+$destroyed-offset: 30px;
+$destroyed-stamp-duration: 320ms;
 $button-height: 42px;
 $radius-button: 8px;
 $radius-card: 10px;
@@ -470,9 +473,42 @@ img {
     }
 }
 
+// Stamped over the loser's art when a game ending badge cut the game short
+.player-destroyed {
+    position: absolute;
+    bottom: $stage-floor-offset + $destroyed-offset;
+    left: 50%;
+    z-index: 1;
+    width: 88%;
+    max-width: $destroyed-width;
+    transform: translateX(-50%);
+}
+
+.player-destroyed-image {
+    display: block;
+    width: 100%;
+    animation: player-destroyed-stamp $destroyed-stamp-duration cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+@keyframes player-destroyed-stamp {
+    from {
+        opacity: 0;
+        transform: scale(1.7);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
 // Mirroring the whole stage is safe: the floor and shadow are centred
 .p2-action {
     transform: scale(-1, 1);
+}
+
+// The mirrored stage would flip the wordmark, so it is flipped back to stay readable
+.p2-action .player-destroyed {
+    transform: translateX(-50%) scale(-1, 1);
 }
 
 // --- Setup column --------------------------------------------------------------

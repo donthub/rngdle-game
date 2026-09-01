@@ -13,8 +13,9 @@ function resolveWinner(p1Score, p2Score) {
     return { subject: "Draw!", predicate: null, className: "winner-draw", player: null };
 }
 
-// On a draw neither side is tinted or dimmed, so the two columns read as equals.
-function ResultColumn({ player, state, winner }) {
+// On a draw neither side is tinted or dimmed, so the two columns read as equals, and
+// nobody is destroyed either.
+function ResultColumn({ player, state, winner, destroyed }) {
     const won = winner.player === player;
     const drawn = winner.player === null;
     return (
@@ -26,17 +27,20 @@ function ResultColumn({ player, state, winner }) {
                                       score={state.score}
                                       muted={!won && !drawn}/>
                 <div className="player-divider"/>
-                <PlayerResultPanel player={player} character={state.character} winner={won}/>
+                <PlayerResultPanel player={player}
+                                   character={state.character}
+                                   winner={won}
+                                   destroyed={destroyed && !won && !drawn}/>
             </div>
         </PlayerColumn>
     );
 }
 
-export default function FinishedPage({ currentRound, rounds, p1, p2, onReset, onExit }) {
+export default function FinishedPage({ currentRound, rounds, p1, p2, destroyed, onReset, onExit }) {
     const winner = resolveWinner(p1.score, p2.score);
     return (
         <>
-            <ResultColumn player="p1" state={p1} winner={winner}/>
+            <ResultColumn player="p1" state={p1} winner={winner} destroyed={destroyed}/>
             <div className="center-column center-column-result">
                 <span className="section-label">Result</span>
                 <div className="result-headline">
@@ -54,7 +58,7 @@ export default function FinishedPage({ currentRound, rounds, p1, p2, onReset, on
                     <button type="button" className="button button-secondary" onClick={onExit}>Exit</button>
                 </div>
             </div>
-            <ResultColumn player="p2" state={p2} winner={winner}/>
+            <ResultColumn player="p2" state={p2} winner={winner} destroyed={destroyed}/>
         </>
     );
 }

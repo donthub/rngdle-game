@@ -39,6 +39,20 @@ $players: (
     )
 );
 
+// Fireworks burst in every hue rather than the winner's, so the celebration reads as
+// its own thing next to the player accents. Lightness and chroma are held close enough
+// that no single hue jumps out, and each stays clear of the sRGB gamut edge.
+$firework-sparks: (
+    #d73431, // oklch(58% 0.2 27)
+    #d07333, // oklch(65% 0.14 52)
+    #cb9c3e, // oklch(72% 0.123 82)
+    #33974b, // oklch(60% 0.145 148)
+    #34969b, // oklch(62% 0.089 200)
+    #2d7ccd, // oklch(58% 0.145 252)
+    #894ed6, // oklch(56% 0.2 300)
+    #c63895 // oklch(58% 0.2 345)
+);
+
 $winner-colors: (
     "p1": $color-p1,
     "p2": $color-p2,
@@ -206,6 +220,7 @@ img {
 }
 
 .player-column {
+    position: relative;
     display: flex;
     flex: 1 1 0;
     flex-direction: column;
@@ -213,8 +228,23 @@ img {
 }
 
 .player-accent-rule {
+    position: relative;
+    z-index: 1;
     flex: 0 0 $accent-rule-height;
     background: $color-line;
+}
+
+// Sits over the panels so the sparks pass in front of the character art, and takes no
+// clicks. The sim reads its palette from the custom property.
+.fireworks {
+    --firework-colors: #{$firework-sparks};
+
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
 }
 
 .center-column {
@@ -282,6 +312,8 @@ img {
 // --- Player header: identity on the outer edge, score against the centre -------
 
 .player-body {
+    position: relative;
+    z-index: 1;
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;

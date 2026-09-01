@@ -4,7 +4,7 @@ import FinishedPage from "./pages/FinishedPage.jsx";
 import InProgressPage from "./pages/InProgressPage.jsx";
 import WaitingPage from "./pages/WaitingPage.jsx";
 import TopBar from "./components/TopBar.jsx";
-import { resolveBadgeMoveImage } from "./badges.js";
+import { isGameEndingBadge, resolveBadgeMoveImage } from "./badges.js";
 import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
 import { PLAYER_KEYS } from "./players.js";
@@ -57,6 +57,16 @@ function Game({ onReset }) {
 
     const gameStatusRef = useLatestRef(gameStatus);
     const roundsRef = useLatestRef(rounds);
+    const currentRoundRef = useLatestRef(currentRound);
+
+    // A game ending badge stops the driver after the current round (see game_round.py),
+    // so the round meter is cut back to make that round the last one.
+    const addBadge = (player, badge) => {
+        player.addBadge(badge);
+        if (isGameEndingBadge(badge) && currentRoundRef.current !== null) {
+            setRounds(previousRounds => Math.min(previousRounds, currentRoundRef.current + 1));
+        }
+    };
 
     // Imperative bridge used by the Playwright driver (see game.py).
     React.useEffect(() => {
@@ -65,8 +75,8 @@ function Game({ onReset }) {
             setCurrentRound: value => setCurrentRound(Number(value)),
             addP1Score: value => p1.addScore(value),
             addP2Score: value => p2.addScore(value),
-            addP1Badge: value => p1.addBadge(value),
-            addP2Badge: value => p2.addBadge(value),
+            addP1Badge: value => addBadge(p1, value),
+            addP2Badge: value => addBadge(p2, value),
             finishGame: () => setFinishRequested(true),
 
             // Getters

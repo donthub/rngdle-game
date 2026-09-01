@@ -42,10 +42,18 @@ def play_game(game_api: GameApi):
     rounds = game_api.get_rounds()
     logger.info(f"Rounds: {rounds}")
 
-    for round_index in range(rounds):
+    round_index = 0
+    while round_index < rounds:
         game_api.set_current_round(round_index)
         for player, score in start_round(game_api).items():
             game_api.add_score(player, score)
+
+        # A game ending badge makes the round it was rolled in the last one (see web/src/badges.js)
+        remaining_rounds = game_api.get_rounds()
+        if remaining_rounds != rounds:
+            logger.info(f"Rounds cut back to {remaining_rounds}")
+            rounds = remaining_rounds
+        round_index += 1
 
     game_api.finish_game()
     game_api.wait_until_finished()

@@ -10,6 +10,13 @@ const BADGE_MOVE_TYPES = Object.freeze({
     MYTHIC: "instantkill",
 });
 
+// Rolling one of these is rare enough to end the game on the spot (see game_round.py)
+const GAME_ENDING_BADGES = Object.freeze(["ANOMALY", "MYTHIC"]);
+
+export function isGameEndingBadge(badge) {
+    return GAME_ENDING_BADGES.includes(badge);
+}
+
 export function resolveBadgeMoveImage(badge, character, previousImage = null) {
     const moveType = BADGE_MOVE_TYPES[badge];
     if (moveType === undefined) {

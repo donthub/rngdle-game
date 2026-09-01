@@ -1,23 +1,32 @@
-import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
 import InfoRounds from "../components/InfoRounds.jsx";
-import InfoStatus from "../components/InfoStatus.jsx";
 import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
+import PlayerColumn from "../components/PlayerColumn.jsx";
+import PlayerNameScorePanel from "../components/PlayerNameScorePanel.jsx";
+import { PLAYER_LABELS } from "../players.js";
 
-export default function InProgressPage({ gameStatus, currentRound, rounds, p1, p2 }) {
+function PlayColumn({ player, state }) {
     return (
-        <div className="flex-row">
-            <div className="flex-col w-100">
-                <PlayerNameScorePanel player="p1" label="Player 1" {...p1}/>
-                <PlayerActionPanel player="p1" {...p1}/>
+        <PlayerColumn player={player} active>
+            <div className="player-body">
+                <PlayerNameScorePanel player={player}
+                                      label={PLAYER_LABELS[player]}
+                                      name={state.name}
+                                      score={state.score}/>
+                <div className="player-divider"/>
+                <PlayerActionPanel player={player} character={state.character} action={state.action}/>
             </div>
-            <div className="flex-col">
+        </PlayerColumn>
+    );
+}
+
+export default function InProgressPage({ currentRound, rounds, p1, p2 }) {
+    return (
+        <>
+            <PlayColumn player="p1" state={p1}/>
+            <div className="center-column center-column-play">
                 <InfoRounds currentRound={currentRound} rounds={rounds}/>
-                <InfoStatus gameStatus={gameStatus}/>
             </div>
-            <div className="flex-col w-100">
-                <PlayerNameScorePanel player="p2" label="Player 2" {...p2}/>
-                <PlayerActionPanel player="p2" {...p2}/>
-            </div>
-        </div>
+            <PlayColumn player="p2" state={p2}/>
+        </>
     );
 }

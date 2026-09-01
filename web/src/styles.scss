@@ -1,11 +1,42 @@
-// Colors
-$color-p1: red;
-$color-p2: blue;
-$color-draw: gray;
+@use "sass:map";
 
-$player-colors: (
-    "p1": $color-p1,
-    "p2": $color-p2
+// Design tokens for the minimalist light theme. Values are authored in oklch and
+// written here as the resolved hex, with the source coordinates kept in comments.
+
+// Surfaces and ink
+$color-bg: #fafaf7; // oklch(98.4% 0.0035 95)
+$color-surface: #ffffff;
+$color-line: #e0e0dc; // oklch(90.5% 0.005 95)
+$color-line-soft: #ededea; // oklch(94.5% 0.004 95)
+$color-ink: #1e1d19; // oklch(23% 0.008 95)
+$color-ink-mid: #595853; // oklch(46% 0.008 95)
+$color-ink-soft: #8d8c87; // oklch(64% 0.007 95)
+$color-ink-faint: #b9b8b2;
+$color-ink-ghost: #cfceca;
+$color-ink-hover: #37352f;
+$color-track: #e8e8e4;
+$color-link-hover: #0052a1;
+
+// Player accents: matched oklch lightness and chroma, hue only varies
+$color-p1: #bb4840; // oklch(55.5% 0.15 27)
+$color-p2: #1e75c7; // oklch(55.5% 0.15 252)
+$color-draw: #76746d; // oklch(56% 0.012 95)
+
+$players: (
+    "p1": (
+        accent: $color-p1,
+        line: #e8ada6, // oklch(80% 0.07 27)
+        tint: #ffefec, // oklch(96.5% 0.02 27)
+        rule: #f0d9d5, // oklch(90.3% 0.026 29)
+        shadow: rgba(148, 34, 31, 0.13) // oklch(44% 0.15 27)
+    ),
+    "p2": (
+        accent: $color-p2,
+        line: #9dc1ea, // oklch(80% 0.07 252)
+        tint: #eaf5ff, // oklch(96.5% 0.02 252)
+        rule: #d3e1f0, // oklch(90.3% 0.026 252)
+        shadow: rgba(0, 82, 161, 0.13) // oklch(44% 0.15 252)
+    )
 );
 
 $winner-colors: (
@@ -14,73 +45,371 @@ $winner-colors: (
     "draw": $color-draw
 );
 
-// Font sizes
-$font-size-player-score: 48px;
-$font-size-winner: 64px;
+// Game status dot: neutral on purpose, so the two accents stay player-only
+$status-dots: (
+    "waiting": transparent,
+    "in-progress": $color-ink,
+    "finished": $color-ink-soft,
+    "exited": $color-ink-soft
+);
+
+// Type
+$font-family-ui: "Space Grotesk", "Helvetica Neue", ui-sans-serif, sans-serif;
+$font-family-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+$font-size-player-score: 42px;
+$font-size-winner: 38px;
+$font-size-round: 58px;
+$font-size-round-total: 26px;
+$font-size-player-name: 19px;
+$font-size-name-input: 17px;
+$font-size-wordmark: 17px;
+$font-size-tag: 11px;
+$font-size-body: 12px;
+$font-size-label: 10px;
+
+$tracking-label: 0.16em;
+$tracking-tag: 0.12em;
 
 // Metrics
-$portrait-height: 350px;
-$nameplate-height: 40px;
-$action-height: 350px;
+$topbar-height: 44px;
+$accent-rule-height: 2px;
+$center-width-setup: 820px;
+$center-width-play: 560px;
+$portrait-height: 300px;
+$action-height: 300px;
+$roster-width: 660px;
+$roster-height: 177px;
+$stage-floor-offset: 36px;
+$stage-floor-width: 460px;
+$button-height: 42px;
+$radius-button: 8px;
+$radius-card: 10px;
+$radius-pill: 999px;
 $action-fade-duration: 200ms;
 
-.flex {
-    display: flex;
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
 }
 
-.flex-col {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-.flex-row {
-    display: flex;
-    flex-direction: row;
-}
-
-.w-100 {
-    width: 100%;
-}
-
-.h-100 {
+html,
+body,
+#root {
     height: 100%;
 }
 
-.align-items-center {
-    align-items: center;
+body {
+    margin: 0;
+    overflow: hidden;
+    background: $color-bg;
+    color: $color-ink;
+    font-family: $font-family-ui;
+    -webkit-font-smoothing: antialiased;
 }
 
-.justify-content-center {
-    justify-content: center;
-}
+a {
+    color: $color-p2;
+    text-decoration: none;
 
-@each $player, $color in $player-colors {
-    .#{$player}-name {
-        color: $color;
+    &:hover {
+        color: $color-link-hover;
     }
+}
+
+img {
+    display: block;
+}
+
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+}
+
+// --- Top bar -------------------------------------------------------------------
+
+.top-bar {
+    display: flex;
+    flex: 0 0 $topbar-height;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 24px;
+    background: $color-surface;
+    border-bottom: 1px solid $color-line;
+}
+
+.top-bar-brand {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.wordmark {
+    font-family: $font-family-mono;
+    font-size: $font-size-wordmark;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    color: $color-ink;
+}
+
+.top-bar-subtitle {
+    font-size: $font-size-label;
+    font-weight: 500;
+    letter-spacing: $tracking-label;
+    text-transform: uppercase;
+    color: $color-ink-soft;
+}
+
+.game-status {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    height: 26px;
+    padding: 0 12px 0 10px;
+    background: $color-bg;
+    border: 1px solid $color-line;
+    border-radius: $radius-pill;
+}
+
+.game-status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+}
+
+@each $status, $color in $status-dots {
+    .game-status-dot-#{$status} {
+        background: $color;
+
+        @if $color == transparent {
+            border: 1.5px solid $color-ink-soft;
+        }
+    }
+}
+
+.game-status-label {
+    font-size: $font-size-body;
+    font-weight: 500;
+    letter-spacing: 0.02em;
+    color: $color-ink-mid;
+}
+
+// --- Triptych ------------------------------------------------------------------
+
+.game-body {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.player-column {
+    display: flex;
+    flex: 1 1 0;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.player-accent-rule {
+    flex: 0 0 $accent-rule-height;
+    background: $color-line;
+}
+
+.center-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: $color-surface;
+    border-left: 1px solid $color-line;
+    border-right: 1px solid $color-line;
+}
+
+.center-column-setup {
+    flex: 0 0 $center-width-setup;
+    padding: 16px 32px 14px;
+}
+
+.center-column-play {
+    flex: 0 0 $center-width-play;
+    justify-content: center;
+    gap: 26px;
+    padding: 0 44px;
+}
+
+.center-column-result {
+    flex: 0 0 $center-width-play;
+    justify-content: center;
+    padding: 0 44px;
+}
+
+@each $player, $tokens in $players {
+    .#{$player}-accent-rule-active {
+        background: map.get($tokens, accent);
+    }
+
+    .#{$player}-tag {
+        color: map.get($tokens, accent);
+    }
+
+    .#{$player}-column-winner {
+        background: map.get($tokens, tint);
+
+        .player-divider {
+            background: map.get($tokens, rule);
+        }
+
+        .player-stage-floor {
+            background: map.get($tokens, line);
+        }
+
+        .player-stage-shadow {
+            background: radial-gradient(closest-side, map.get($tokens, shadow), transparent);
+        }
+    }
+
+    .#{$player}-tag-muted {
+        color: map.get($tokens, line);
+    }
+
+    .#{$player}-name-field-active {
+        border-bottom: 1.5px solid map.get($tokens, accent);
+        caret-color: map.get($tokens, accent);
+    }
+}
+
+// --- Player header: identity on the outer edge, score against the centre -------
+
+.player-body {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    padding: 18px 44px 0;
+    min-height: 0;
+}
+
+.player-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 24px;
+}
+
+.player-header-mirrored {
+    flex-direction: row-reverse;
+}
+
+.player-identity {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    min-width: 0;
+}
+
+.player-tag {
+    font-family: $font-family-mono;
+    font-size: $font-size-tag;
+    font-weight: 700;
+    letter-spacing: $tracking-tag;
+}
+
+.player-name {
+    overflow: hidden;
+    font-size: $font-size-player-name;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    color: $color-ink;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-name-muted {
+    font-weight: 500;
+    color: $color-ink-soft;
 }
 
 .player-score {
-    font-size: $font-size-player-score;
+    display: flex;
+    align-items: baseline;
+    gap: 7px;
 }
 
-.player-action-container {
+.player-score-value {
+    font-family: $font-family-mono;
+    font-size: $font-size-player-score;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.03em;
+    font-variant-numeric: tabular-nums;
+    color: $color-ink;
+}
+
+.player-score-unit {
+    font-size: $font-size-body;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    color: $color-ink-soft;
+}
+
+.player-score-muted {
+    .player-score-value {
+        font-weight: 500;
+        color: $color-ink-soft;
+    }
+
+    .player-score-unit {
+        color: $color-ink-faint;
+    }
+}
+
+.player-divider {
+    height: 1px;
+    margin-top: 15px;
+    background: $color-line-soft;
+}
+
+// --- Stage: art stands on a hairline floor with a soft contact shadow ----------
+
+.player-stage {
     position: relative;
     display: flex;
-    align-items: center;
+    flex: 1 1 auto;
+    align-items: flex-end;
     justify-content: center;
-    height: $action-height;
-    width: 100%;
+    min-height: 0;
+}
 
-    img {
-        max-height: $action-height;
-        max-width: 100%;
-    }
+.player-stage-floor,
+.player-stage-shadow {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.player-stage-floor {
+    bottom: $stage-floor-offset;
+    width: 70%;
+    max-width: $stage-floor-width;
+    height: 1px;
+    background: $color-line;
+}
+
+.player-stage-shadow {
+    bottom: $stage-floor-offset - 11px;
+    width: 210px;
+    height: 22px;
+    border-radius: 50%;
+    background: radial-gradient(closest-side, rgba(30, 29, 25, 0.11), transparent);
 }
 
 .player-action-image {
     position: absolute;
+    bottom: $stage-floor-offset;
+    left: 50%;
+    max-height: $action-height;
+    width: auto;
+    transform: translateX(-50%);
 }
 
 .player-action-current {
@@ -109,14 +438,285 @@ $action-fade-duration: 200ms;
     }
 }
 
+// Mirroring the whole stage is safe: the floor and shadow are centred
 .p2-action {
     transform: scale(-1, 1);
 }
 
-.winner-container {
+// --- Setup column --------------------------------------------------------------
+
+.player-setup {
     display: flex;
-    font-size: $font-size-winner;
+    flex: 1 1 auto;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 40px 0;
+    min-height: 0;
+}
+
+.name-field {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+    max-width: 340px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid $color-line;
+}
+
+.name-field-input {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 0;
+    background: none;
+    border: 0;
+    outline: none;
+    font-family: inherit;
+    font-size: $font-size-name-input;
+    font-weight: 500;
+    color: $color-ink;
+
+    &::placeholder {
+        font-weight: 400;
+        color: $color-ink-soft;
+    }
+}
+
+.player-character-nameplate img {
+    height: auto;
+}
+
+.player-character-portrait {
+    display: flex;
+    height: $portrait-height;
+
+    img {
+        height: 100%;
+        width: auto;
+    }
+}
+
+// --- Rounds --------------------------------------------------------------------
+
+.section-label {
+    font-size: $font-size-label;
+    font-weight: 600;
+    letter-spacing: $tracking-label;
+    text-transform: uppercase;
+    color: $color-ink-soft;
+}
+
+.rounds-selector {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.rounds-stepper {
+    display: flex;
+    align-items: center;
+    height: 34px;
+    overflow: hidden;
+    background: $color-bg;
+    border: 1px solid $color-line;
+    border-radius: $radius-card;
+}
+
+.rounds-stepper-button {
+    display: flex;
+    align-items: center;
     justify-content: center;
+    width: 34px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    font-size: 16px;
+    color: $color-ink-mid;
+    cursor: pointer;
+
+    &:first-child {
+        border-right: 1px solid $color-line;
+    }
+
+    &:last-child {
+        border-left: 1px solid $color-line;
+    }
+
+    &:hover:not(:disabled) {
+        background: $color-line-soft;
+        color: $color-ink;
+    }
+
+    &:disabled {
+        color: $color-ink-ghost;
+        cursor: default;
+    }
+}
+
+.rounds-stepper-value {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 52px;
+    font-family: $font-family-mono;
+    font-size: 16px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: $color-ink;
+}
+
+.round-block {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+.round-counter {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-family: $font-family-mono;
+    font-variant-numeric: tabular-nums;
+}
+
+.round-counter-current {
+    font-size: $font-size-round;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.04em;
+    color: $color-ink;
+}
+
+.round-counter-separator {
+    font-size: $font-size-round-total;
+    font-weight: 500;
+    line-height: 1;
+    color: $color-ink-faint;
+}
+
+.round-counter-total {
+    font-size: $font-size-round-total;
+    font-weight: 500;
+    line-height: 1;
+    color: $color-ink-mid;
+}
+
+.round-meter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 9px;
+    width: 100%;
+}
+
+.round-meter-track,
+.round-meter-labels {
+    display: flex;
+    gap: 8px;
+    width: 100%;
+    max-width: 268px;
+}
+
+.round-meter-bar {
+    flex: 1 1 0;
+    min-width: 4px;
+    height: 4px;
+    border-radius: 2px;
+    background: $color-track;
+}
+
+.round-meter-bar-done {
+    background: $color-ink-faint;
+}
+
+.round-meter-bar-current {
+    background: $color-ink;
+}
+
+.round-meter-label {
+    flex: 1 1 0;
+    min-width: 0;
+    font-family: $font-family-mono;
+    font-size: $font-size-label;
+    font-variant-numeric: tabular-nums;
+    color: $color-ink-ghost;
+    text-align: center;
+}
+
+.round-meter-label-done {
+    color: $color-ink-faint;
+}
+
+.round-meter-label-current {
+    font-weight: 700;
+    color: $color-ink;
+}
+
+// --- Character selector --------------------------------------------------------
+
+.character-selector {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.character-selector-panel {
+    padding: 6px;
+    background: $color-bg;
+    border: 1px solid $color-line-soft;
+    border-radius: $radius-card;
+
+    img {
+        width: $roster-width;
+        height: $roster-height;
+    }
+}
+
+.character-selector-hint {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: $font-size-body;
+}
+
+.character-selector-hint-lead {
+    color: $color-ink-soft;
+}
+
+.character-selector-hint-separator {
+    width: 1px;
+    height: 11px;
+    background: $color-line;
+}
+
+.character-selector-hint-label {
+    color: $color-ink-mid;
+}
+
+// --- Result --------------------------------------------------------------------
+
+.result-headline {
+    display: flex;
+    align-items: baseline;
+    gap: 11px;
+    margin-top: 12px;
+}
+
+.result-subject,
+.result-predicate {
+    font-size: $font-size-winner;
+    font-weight: 700;
+    line-height: 1.05;
+    letter-spacing: -0.03em;
+}
+
+.result-predicate {
+    color: $color-ink;
 }
 
 @each $winner, $color in $winner-colors {
@@ -125,11 +725,80 @@ $action-fade-duration: 200ms;
     }
 }
 
-.player-character-portrait {
+.result-rounds {
     display: flex;
-    height: $portrait-height;
+    align-items: baseline;
+    gap: 8px;
+    margin-top: 14px;
 }
 
-.player-character-nameplate {
-    height: $nameplate-height;
+.result-rounds-count {
+    font-family: $font-family-mono;
+    font-size: 13px;
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    color: $color-ink-mid;
+}
+
+.result-rounds-label {
+    font-size: $font-size-body;
+    color: $color-ink-soft;
+}
+
+// --- Buttons and rules ---------------------------------------------------------
+
+.divider {
+    width: 100%;
+    height: 1px;
+    margin: 22px 0;
+    background: $color-line-soft;
+}
+
+.divider-short {
+    width: 220px;
+    margin: 26px 0;
+}
+
+.button-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: $button-height;
+    border: 0;
+    border-radius: $radius-button;
+    font-family: inherit;
+    font-size: 15px;
+    cursor: pointer;
+}
+
+.button-primary {
+    padding: 0 34px;
+    background: $color-ink;
+    color: $color-surface;
+    font-weight: 600;
+    letter-spacing: 0.01em;
+
+    &:hover {
+        background: $color-ink-hover;
+    }
+}
+
+.button-secondary {
+    padding: 0 26px;
+    background: $color-surface;
+    border: 1px solid $color-line;
+    color: $color-ink-mid;
+    font-weight: 500;
+
+    &:hover {
+        background: $color-bg;
+        border-color: $color-ink-faint;
+        color: $color-ink;
+    }
 }

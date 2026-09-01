@@ -3,9 +3,11 @@ import React from "react";
 import FinishedPage from "./pages/FinishedPage.jsx";
 import InProgressPage from "./pages/InProgressPage.jsx";
 import WaitingPage from "./pages/WaitingPage.jsx";
+import TopBar from "./components/TopBar.jsx";
 import { resolveBadgeMoveImage } from "./badges.js";
 import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
+import { PLAYER_KEYS } from "./players.js";
 import useLatestRef from "./useLatestRef.js";
 
 function usePlayer(defaultCharacter) {
@@ -72,32 +74,38 @@ function Game({ onReset }) {
     const onExit = () => setGameStatus(GameStatus.EXITED);
     const displayedRound = currentRound === null ? 0 : currentRound + 1;
 
+    let page;
     if (gameStatus === GameStatus.WAITING) {
-        return <WaitingPage gameStatus={gameStatus}
-                            rounds={rounds}
+        page = <WaitingPage rounds={rounds}
                             onRoundsChange={setRounds}
                             onSelectCharacter={onSelectCharacter}
+                            nextPlayer={PLAYER_KEYS[selectedPlayerIndex]}
                             p1={p1.state}
                             p2={p2.state}
                             onStart={onStart}
                             onExit={onExit}/>;
-    }
-
-    if (gameStatus === GameStatus.FINISHED) {
-        return <FinishedPage gameStatus={gameStatus}
-                             currentRound={displayedRound}
+    } else if (gameStatus === GameStatus.FINISHED) {
+        page = <FinishedPage currentRound={displayedRound}
                              rounds={rounds}
                              p1={p1.state}
                              p2={p2.state}
                              onReset={onReset}
                              onExit={onExit}/>;
+    } else {
+        page = <InProgressPage currentRound={displayedRound}
+                               rounds={rounds}
+                               p1={p1.state}
+                               p2={p2.state}/>;
     }
 
-    return <InProgressPage gameStatus={gameStatus}
-                           currentRound={displayedRound}
-                           rounds={rounds}
-                           p1={p1.state}
-                           p2={p2.state}/>;
+    return (
+        <div className="app">
+            <TopBar gameStatus={gameStatus}/>
+            <div className="game-body">
+                {page}
+            </div>
+        </div>
+    );
 }
 
 export default function App() {

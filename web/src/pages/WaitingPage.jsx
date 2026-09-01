@@ -1,38 +1,41 @@
-import InfoStatus from "../components/InfoStatus.jsx";
 import CharacterSelector from "../components/CharacterSelector.jsx";
+import PlayerCharacter from "../components/PlayerCharacter.jsx";
+import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerNameSelector from "../components/PlayerNameSelector.jsx";
 import RoundsSelector from "../components/RoundsSelector.jsx";
-import PlayerCharacter from "../components/PlayerCharacter.jsx";
+import { PLAYER_LABELS } from "../players.js";
 
-export default function WaitingPage({ gameStatus, rounds, onRoundsChange, onSelectCharacter, p1, p2, onStart, onExit }) {
+// The side receiving the next character pick is the active one.
+function SetupColumn({ player, state, active }) {
     return (
-        <div className="flex-col w-100">
-            <div className="flex-row w-100 justify-content-center">
-                <div className="flex-col w-100">
-                    <PlayerNameSelector label="Player 1" {...p1} />
-                    <PlayerCharacter {...p1} />
-                </div>
-                <div className="flex-col">
-                    <div className="flex-col">
-                        <RoundsSelector rounds={rounds}
-                                        onRoundsChange={onRoundsChange}/>
-                        <InfoStatus gameStatus={gameStatus}/>
-                    </div>
-                    <CharacterSelector onSelectCharacter={onSelectCharacter} />
-                    <div className="flex-row">
-                        <div className="flex">
-                            <button onClick={onStart}>Fight!</button>
-                        </div>
-                        <div className="flex">
-                            <button onClick={onExit}>Exit</button>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex-col w-100">
-                    <PlayerNameSelector label="Player 2" {...p2} />
-                    <PlayerCharacter {...p2} />
+        <PlayerColumn player={player} active={active}>
+            <div className="player-setup">
+                <PlayerNameSelector player={player}
+                                    label={PLAYER_LABELS[player]}
+                                    name={state.name}
+                                    active={active}
+                                    onNameChange={state.onNameChange}/>
+                <PlayerCharacter character={state.character}/>
+            </div>
+        </PlayerColumn>
+    );
+}
+
+export default function WaitingPage({ rounds, onRoundsChange, onSelectCharacter, nextPlayer, p1, p2, onStart, onExit }) {
+    return (
+        <>
+            <SetupColumn player="p1" state={p1} active={nextPlayer === "p1"}/>
+            <div className="center-column center-column-setup">
+                <RoundsSelector rounds={rounds} onRoundsChange={onRoundsChange}/>
+                <div className="divider"/>
+                <CharacterSelector nextPlayer={nextPlayer} onSelectCharacter={onSelectCharacter}/>
+                <div className="divider"/>
+                <div className="button-row">
+                    <button type="button" className="button button-primary" onClick={onStart}>Fight!</button>
+                    <button type="button" className="button button-secondary" onClick={onExit}>Exit</button>
                 </div>
             </div>
-        </div>
+            <SetupColumn player="p2" state={p2} active={nextPlayer === "p2"}/>
+        </>
     );
 }

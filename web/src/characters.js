@@ -31,5 +31,5 @@ export const Character = Object.freeze({
 });
 
 export function characterAssetUrl(character, asset) {
-    return `/assets/${character.id}/${asset}.png`;
+    return `/assets/characters/${character.id}/${asset}.png`;
 }

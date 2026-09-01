@@ -1,6 +1,6 @@
 import { MOVE_IMAGES } from "virtual:move-images";
 
-// Badge rarities are mapped to the move type directories under public/assets/{character id}
+// Badge rarities are mapped to the move type directories under public/assets/characters/{character id}
 const BADGE_MOVE_TYPES = Object.freeze({
     COMMON: "normal",
     UNCOMMON: "special",

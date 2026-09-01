@@ -5,7 +5,7 @@ import { fileURLToPath } from "node:url";
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 
-const ASSETS_DIRECTORY = fileURLToPath(new URL("./public/assets", import.meta.url));
+const CHARACTERS_DIRECTORY = fileURLToPath(new URL("./public/assets/characters", import.meta.url));
 const MOVE_IMAGES_MODULE_ID = "virtual:move-images";
 const RESOLVED_MOVE_IMAGES_MODULE_ID = `\0${MOVE_IMAGES_MODULE_ID}`;
 
@@ -15,16 +15,16 @@ function readDirectoryNames(directory) {
         .map(entry => entry.name);
 }
 
-// { <character id>: { <move type>: ["/assets/<character id>/<move type>/<file>", ...] } }
+// { <character id>: { <move type>: ["/assets/characters/<character id>/<move type>/<file>", ...] } }
 function readMoveImages() {
     const moveImages = {};
-    for (const character of readDirectoryNames(ASSETS_DIRECTORY)) {
-        const characterDirectory = path.join(ASSETS_DIRECTORY, character);
+    for (const character of readDirectoryNames(CHARACTERS_DIRECTORY)) {
+        const characterDirectory = path.join(CHARACTERS_DIRECTORY, character);
         const characterImages = {};
         for (const moveType of readDirectoryNames(characterDirectory)) {
             characterImages[moveType] = fs.readdirSync(path.join(characterDirectory, moveType))
                 .filter(file => file.endsWith(".png"))
-                .map(file => `/assets/${character}/${moveType}/${file}`);
+                .map(file => `/assets/characters/${character}/${moveType}/${file}`);
         }
         moveImages[character] = characterImages;
     }

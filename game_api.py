@@ -13,6 +13,10 @@ class GameApi:
     def wait_until_started_or_exited(self):
         self.page.wait_for_function("() => window.gameApi.isStarted() || window.gameApi.isExited()", timeout=0)
 
+    def wait_until_finished(self):
+        """The result page is held back until the last count up animation lands."""
+        self.page.wait_for_function("() => window.gameApi.isFinished()", timeout=0)
+
     def wait_until_not_finished(self):
         self.page.wait_for_function("() => !window.gameApi.isFinished()", timeout=0)
 

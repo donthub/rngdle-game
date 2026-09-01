@@ -8,6 +8,7 @@ import { resolveBadgeMoveImage } from "./badges.js";
 import { Character } from "./characters.js";
 import { GameStatus } from "./gameStatus.js";
 import { PLAYER_KEYS } from "./players.js";
+import useCountUp from "./useCountUp.js";
 import useLatestRef from "./useLatestRef.js";
 
 function usePlayer(defaultCharacter) {
@@ -16,11 +17,16 @@ function usePlayer(defaultCharacter) {
     const [character, setCharacter] = React.useState(defaultCharacter);
     const [action, setAction] = React.useState(null);
 
+    // The panels show the counting value; the awarded total stays behind it
+    // until the animation catches up.
+    const countedScore = useCountUp(score);
+
     const nameRef = useLatestRef(name);
     const characterRef = useLatestRef(character);
 
     return {
-        state: { name, score, character, action, onNameChange: setName },
+        state: { name, score: countedScore, character, action, onNameChange: setName },
+        isCountingUp: countedScore !== score,
         setCharacter,
         getName: () => nameRef.current,
         addScore: value => setScore(previousScore => previousScore + Number(value)),
@@ -33,11 +39,21 @@ function Game({ onReset }) {
     const [rounds, setRounds] = React.useState(5);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
+    const [finishRequested, setFinishRequested] = React.useState(false);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = React.useState(0);
 
     const p1 = usePlayer(Character.SOL);
     const p2 = usePlayer(Character.KY);
     const players = [p1, p2];
+
+    // The last round's score is still counting up when the driver finishes the
+    // game, so hold the result page back until both totals have landed.
+    const isCountingUp = players.some(player => player.isCountingUp);
+    React.useEffect(() => {
+        if (finishRequested && !isCountingUp) {
+            setGameStatus(GameStatus.FINISHED);
+        }
+    }, [finishRequested, isCountingUp]);
 
     const gameStatusRef = useLatestRef(gameStatus);
     const roundsRef = useLatestRef(rounds);
@@ -51,7 +67,7 @@ function Game({ onReset }) {
             addP2Score: value => p2.addScore(value),
             addP1Badge: value => p1.addBadge(value),
             addP2Badge: value => p2.addBadge(value),
-            finishGame: () => setGameStatus(GameStatus.FINISHED),
+            finishGame: () => setFinishRequested(true),
 
             // Getters
             isStarted: () => gameStatusRef.current === GameStatus.IN_PROGRESS,

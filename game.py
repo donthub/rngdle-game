@@ -48,4 +48,5 @@ def play_game(game_api: GameApi):
             game_api.add_score(player, score)
 
     game_api.finish_game()
+    game_api.wait_until_finished()
     game_api.wait_until_not_finished()

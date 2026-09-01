@@ -1,12 +1,15 @@
 import React from "react";
 
-export default function PlayerActionPanel({ player, character, action }) {
-    const [previousAction, setPreviousAction] = React.useState(null);
-    const [renderedAction, setRenderedAction] = React.useState(action);
+import { characterAssetUrl } from "../characters.js";
 
-    if (renderedAction !== action) {
+export default function PlayerActionPanel({ player, character, action }) {
+    const currentAction = action ?? characterAssetUrl(character, "idle");
+    const [previousAction, setPreviousAction] = React.useState(null);
+    const [renderedAction, setRenderedAction] = React.useState(currentAction);
+
+    if (renderedAction !== currentAction) {
         setPreviousAction(renderedAction);
-        setRenderedAction(action);
+        setRenderedAction(currentAction);
     }
 
     return (
@@ -17,11 +20,10 @@ export default function PlayerActionPanel({ player, character, action }) {
                      alt=""
                      src={previousAction}
                      onAnimationEnd={() => setPreviousAction(null)}/>}
-            {action === null ? null :
-                <img key={`current-${action}`}
-                     className="player-action-image player-action-current"
-                     alt={`${character.name} move`}
-                     src={action}/>}
+            <img key={`current-${currentAction}`}
+                 className="player-action-image player-action-current"
+                 alt={`${character.name} ${action === null ? "idle" : "move"}`}
+                 src={currentAction}/>
         </div>
     );
 }

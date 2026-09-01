@@ -4,7 +4,7 @@ const MAP_NAME = "GGACR_Characters_ImageMap";
 
 export default function CharacterSelector({ onSelectCharacter }) {
     return (
-        <div className="flex">
+        <div className="flex h-100 align-items-center">
             <span>
                 <img src={ROSTER_IMAGE} width={ROSTER_IMAGE_WIDTH} height={ROSTER_IMAGE_HEIGHT}
                      alt="Guilty Gear XX Accent Core Plus R roster" useMap={`#${MAP_NAME}`}/>

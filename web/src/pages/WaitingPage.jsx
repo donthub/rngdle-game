@@ -7,8 +7,8 @@ import PlayerCharacter from "../components/PlayerCharacter.jsx";
 export default function WaitingPage({ gameStatus, rounds, onRoundsChange, onSelectCharacter, p1, p2, onStart, onExit }) {
     return (
         <div className="flex-col w-100">
-            <div className="flex-row">
-                <div className="flex-col">
+            <div className="flex-row w-100 justify-content-center">
+                <div className="flex-col w-100">
                     <PlayerNameSelector label="Player 1" {...p1} />
                     <PlayerCharacter {...p1} />
                 </div>
@@ -19,18 +19,18 @@ export default function WaitingPage({ gameStatus, rounds, onRoundsChange, onSele
                         <InfoStatus gameStatus={gameStatus}/>
                     </div>
                     <CharacterSelector onSelectCharacter={onSelectCharacter} />
+                    <div className="flex-row">
+                        <div className="flex">
+                            <button onClick={onStart}>Fight!</button>
+                        </div>
+                        <div className="flex">
+                            <button onClick={onExit}>Exit</button>
+                        </div>
+                    </div>
                 </div>
-                <div className="flex-col">
+                <div className="flex-col w-100">
                     <PlayerNameSelector label="Player 2" {...p2} />
                     <PlayerCharacter {...p2} />
-                </div>
-            </div>
-            <div className="flex-row">
-                <div className="flex">
-                    <button onClick={onStart}>Fight!</button>
-                </div>
-                <div className="flex">
-                    <button onClick={onExit}>Exit</button>
                 </div>
             </div>
         </div>

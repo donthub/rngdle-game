@@ -43,6 +43,18 @@ $action-fade-duration: 200ms;
     width: 100%;
 }
 
+.h-100 {
+    height: 100%;
+}
+
+.align-items-center {
+    align-items: center;
+}
+
+.justify-content-center {
+    justify-content: center;
+}
+
 @each $player, $color in $player-colors {
     .#{$player}-name {
         color: $color;

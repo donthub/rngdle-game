@@ -713,15 +713,22 @@ img {
 }
 
 .rounds-stepper-value {
-    display: flex;
-    align-items: center;
-    justify-content: center;
     width: 52px;
+    height: 32px;
+    padding: 0;
+    background: none;
+    border: 0;
+    outline: none;
     font-family: $font-family-mono;
     font-size: 16px;
     font-weight: 500;
     font-variant-numeric: tabular-nums;
+    text-align: center;
     color: $color-ink;
+
+    &::selection {
+        background: $color-line-soft;
+    }
 }
 
 .round-block {

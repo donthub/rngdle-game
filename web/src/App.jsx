@@ -11,6 +11,8 @@ import { PLAYER_KEYS } from "./players.js";
 import useCountUp from "./useCountUp.js";
 import useLatestRef from "./useLatestRef.js";
 
+const DEFAULT_ROUNDS = 5;
+
 function usePlayer(defaultCharacter) {
     const [name, setName] = React.useState("");
     const [score, setScore] = React.useState(0);
@@ -35,8 +37,8 @@ function usePlayer(defaultCharacter) {
     };
 }
 
-function Game({ onReset }) {
-    const [rounds, setRounds] = React.useState(5);
+function Game({ selectedRounds, onSelectRounds, onReset }) {
+    const [rounds, setRounds] = React.useState(selectedRounds);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
     const [destroyers, setDestroyers] = React.useState([]);
@@ -106,6 +108,12 @@ function Game({ onReset }) {
         players[selectedPlayerIndex].setCharacter(character);
         setSelectedPlayerIndex(index => (index + 1) % players.length);
     };
+    // The meter can be cut back mid-game by a game ending badge, so what the player
+    // picked is kept above the reset boundary and only the selector writes to it.
+    const onRoundsChange = value => {
+        setRounds(value);
+        onSelectRounds(value);
+    };
     const onStart = () => setGameStatus(GameStatus.IN_PROGRESS);
     const onExit = () => setGameStatus(GameStatus.EXITED);
     const displayedRound = currentRound === null ? 0 : currentRound + 1;
@@ -113,7 +121,7 @@ function Game({ onReset }) {
     let page;
     if (gameStatus === GameStatus.WAITING) {
         page = <WaitingPage rounds={rounds}
-                            onRoundsChange={setRounds}
+                            onRoundsChange={onRoundsChange}
                             onSelectCharacter={onSelectCharacter}
                             nextPlayer={PLAYER_KEYS[selectedPlayerIndex]}
                             p1={p1.state}
@@ -149,8 +157,13 @@ function Game({ onReset }) {
 }
 
 export default function App() {
-    // Bumping the key remounts Game, so every useState falls back to its default.
+    // Bumping the key remounts Game, so every useState falls back to its default. The
+    // round count is held out here so a reset starts over on the same number of rounds.
     const [gameKey, setGameKey] = React.useState(0);
+    const [selectedRounds, setSelectedRounds] = React.useState(DEFAULT_ROUNDS);
 
-    return <Game key={gameKey} onReset={() => setGameKey(key => key + 1)}/>;
+    return <Game key={gameKey}
+                 selectedRounds={selectedRounds}
+                 onSelectRounds={setSelectedRounds}
+                 onReset={() => setGameKey(key => key + 1)}/>;
 }

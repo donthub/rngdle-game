@@ -30,6 +30,7 @@ BADGE_PANEL = f"{RESULT_PANEL} > div:nth-of-type(4)"
 BADGE_PANEL_TITLE = f"{BADGE_PANEL} > div:nth-of-type(1)"
 BADGE_LIST = ".space-y-3"
 BADGE_RARITY = "> div:nth-of-type(1) > div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(3)"
+BADGE_SCORE = "> div:nth-of-type(1) > div:nth-of-type(1) > span:nth-of-type(1)"
 
 THEME_BUTTON = f"[title='{RNGDLE_THEME}']"
 ROLL_BUTTON = "[aria-label='Generate a new number']"
@@ -78,8 +79,6 @@ def start_round(game_api: GameApi) -> dict:
         thread.join()
     drain_badge_queue(game_api, badge_queue)
 
-    return {player: scores[player] for player in PLAYER_WINDOW_POSITIONS}
-
 
 def wait_for_score(score_event: threading.Event, game_api: GameApi, badge_queue: queue.Queue):
     while not score_event.wait(BADGE_POLL_SECONDS):
@@ -90,10 +89,14 @@ def wait_for_score(score_event: threading.Event, game_api: GameApi, badge_queue:
 def drain_badge_queue(game_api: GameApi, badge_queue: queue.Queue):
     while True:
         try:
-            player, badge_rarity = badge_queue.get_nowait()
+            badge_info = badge_queue.get_nowait()
+            player = badge_info["player"]
+            badge_rarity = badge_info["rarity"]
+            badge_score = badge_info["score"]
         except queue.Empty:
             return
         game_api.add_badge(player, badge_rarity)
+        game_api.add_score(player, badge_score)
 
 
 def player_round(
@@ -144,7 +147,14 @@ def collect_badges(page: Page, badge_queue: queue.Queue, player: str):
             badge = badges.nth(badges_count - collected_count - 1)
             badge_rarity = badge.locator(BADGE_RARITY).text_content()
             logger.info(f"[{player}] Badge rarity: {badge_rarity}")
-            badge_queue.put((player, badge_rarity))
+            badge_score_content = badge.locator(BADGE_SCORE).text_content()
+            badge_score = parse_score(badge_score_content)
+            badge_info = {
+                "player": player,
+                "rarity": badge_rarity,
+                "score": badge_score,
+            }
+            badge_queue.put(badge_info)
             collected_count += 1
 
         if page.locator(SCORE_READY).count() > 0:

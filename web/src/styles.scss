@@ -108,6 +108,7 @@ $radius-pill: 999px;
 $action-fade-duration: 200ms;
 $character-enter-duration: 160ms;
 $roster-fade-duration: 140ms;
+$name-clear-fade-duration: 140ms;
 
 *,
 *::before,
@@ -634,6 +635,46 @@ img {
         font-weight: 400;
         color: $color-ink-soft;
     }
+}
+
+// Sits at the far end of the name field, and stays out of sight until the field is
+// reached for. It is always mounted and hidden by opacity - disabled while there is no
+// name to clear - so the name never shifts and every appearance can be faded.
+.name-field-clear {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    padding: 0;
+    background: none;
+    border: 0;
+    color: $color-ink-faint;
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity $name-clear-fade-duration ease, color $name-clear-fade-duration ease;
+
+    .name-field:hover &:not(:disabled),
+    .name-field:focus-within &:not(:disabled) {
+        opacity: 1;
+    }
+
+    &:hover,
+    &:focus-visible {
+        color: $color-ink-hover;
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+}
+
+.icon-clear {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
 }
 
 .player-character {

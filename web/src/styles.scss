@@ -59,6 +59,18 @@ $winner-colors: (
     "draw": $color-draw
 );
 
+// One hue per badge rarity, keyed by the rarities the board knows (see badges.js), and
+// climbing from plain ink to the two that end the game. Lightness and chroma are held
+// close so no chip shouts over the player accents it sits beside.
+$badge-rarities: (
+    "common": $color-draw,
+    "uncommon": #33974b, // oklch(60% 0.145 148)
+    "rare": #2d7ccd, // oklch(58% 0.145 252)
+    "epic": #894ed6, // oklch(56% 0.2 300)
+    "anomaly": #c63895, // oklch(58% 0.2 345)
+    "mythic": #d07333 // oklch(65% 0.14 52)
+);
+
 // Type
 $font-family-ui: "Space Grotesk", "Helvetica Neue", ui-sans-serif, sans-serif;
 $font-family-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -109,6 +121,7 @@ $action-fade-duration: 200ms;
 $character-enter-duration: 160ms;
 $roster-fade-duration: 140ms;
 $name-clear-fade-duration: 140ms;
+$badge-fade-duration: 200ms;
 
 *,
 *::before,
@@ -278,7 +291,7 @@ img {
     }
 }
 
-// --- Player header: identity on the outer edge, above the stage ---------------
+// --- Player header: identity on the outer edge, badge on the inner one ---------
 
 .player-body {
     position: relative;
@@ -290,6 +303,19 @@ img {
     min-height: 0;
 }
 
+// Holds the identity and the badge chip apart at either end of the column, so the chip
+// keeps the corner nearest the centre while the name stays out on the edge.
+.player-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.player-header-mirrored {
+    flex-direction: row-reverse;
+}
+
 .player-identity {
     display: flex;
     align-items: baseline;
@@ -299,6 +325,39 @@ img {
 
 .player-identity-mirrored {
     flex-direction: row-reverse;
+}
+
+// The rarity of the last badge rolled, set in the quiet type of a section label so the hue
+// is all that marks how rare it was, with a wash of that hue behind it rather than a ring
+// around it. A change of rarity remounts the chip, so the new rarity fades over the old
+// rather than cutting over it; a repeat of the rarity already up leaves it standing
+// untouched (see PlayerBadge.jsx).
+.player-badge {
+    flex: none;
+    padding: 3px 9px;
+    border-radius: $radius-pill;
+    font-size: $font-size-label;
+    font-weight: 600;
+    letter-spacing: $tracking-label;
+    text-transform: uppercase;
+    white-space: nowrap;
+    animation: player-badge-fade-in $badge-fade-duration ease-in both;
+}
+
+@each $rarity, $accent in $badge-rarities {
+    .player-badge-#{$rarity} {
+        background: rgba($accent, 0.07);
+        color: rgba($accent, 0.85);
+    }
+}
+
+@keyframes player-badge-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
 }
 
 .player-tag {

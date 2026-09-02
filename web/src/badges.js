@@ -17,6 +17,12 @@ export function isGameEndingBadge(badge) {
     return GAME_ENDING_BADGES.includes(badge);
 }
 
+// A rarity the board has no move type for is one it has never seen, so it is neither
+// drawn on the stage nor named on the chip (see PlayerBadge.jsx).
+export function isKnownBadge(badge) {
+    return BADGE_MOVE_TYPES[badge] !== undefined;
+}
+
 export function resolveBadgeMoveImage(badge, character, previousImage = null) {
     const moveType = BADGE_MOVE_TYPES[badge];
     if (moveType === undefined) {

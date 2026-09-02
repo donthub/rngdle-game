@@ -22,6 +22,7 @@ function usePlayer(setup) {
     const [score, setScore] = React.useState(0);
     const [character, setCharacter] = React.useState(setup.character);
     const [action, setAction] = React.useState(null);
+    const [badge, setBadge] = React.useState(null);
 
     // The panels show the counting value; the awarded total stays behind it
     // until the animation catches up.
@@ -31,13 +32,18 @@ function usePlayer(setup) {
     const characterRef = useLatestRef(character);
 
     return {
-        state: { name, score: countedScore, character, action, onNameChange: setName },
+        state: { name, score: countedScore, character, action, badge, onNameChange: setName },
         isCountingUp: countedScore !== score,
         setCharacter,
         getName: () => nameRef.current,
         addScore: value => setScore(previousScore => previousScore + Number(value)),
-        addBadge: badge => setAction(previousImage =>
-            resolveBadgeMoveImage(badge, characterRef.current, previousImage) ?? previousImage),
+        // Only the rarity of the last badge is kept: the chip has nothing to say about a
+        // repeat of the rarity already up beside it (see PlayerBadge.jsx).
+        addBadge: rarity => {
+            setAction(previousImage =>
+                resolveBadgeMoveImage(rarity, characterRef.current, previousImage) ?? previousImage);
+            setBadge(rarity);
+        },
     };
 }
 

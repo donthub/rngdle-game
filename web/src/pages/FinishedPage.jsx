@@ -59,7 +59,7 @@ function ResultColumn({ player, state, winner, destroyers }) {
     );
 }
 
-export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers, onReset, onExit }) {
+export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers, onRematch, onReset, onExit }) {
     const winner = resolveWinner({ p1, p2 }, destroyers);
     return (
         <div className="board-layout">
@@ -79,8 +79,12 @@ export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers,
                     </div>
                     <div className="divider divider-short"/>
                     <div className="button-row">
-                        <button type="button" className="button button-primary" onClick={onReset}>Reset</button>
-                        <button type="button" className="button button-secondary" onClick={onExit}>Exit</button>
+                        <button type="button" className="button button-primary"
+                                onClick={onReset}>Reset</button>
+                        <button type="button" className="button button-secondary"
+                                onClick={onRematch}>Rematch</button>
+                        <button type="button" className="button button-secondary"
+                                onClick={onExit}>Exit</button>
                     </div>
                 </div>
                 <ResultColumn player="p2" state={p2} winner={winner} destroyers={destroyers}/>

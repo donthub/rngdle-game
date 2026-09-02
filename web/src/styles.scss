@@ -83,7 +83,7 @@ $accent-rule-height: 2px;
 $center-width-setup: 820px;
 $center-width-play: 560px;
 $portrait-height: 300px;
-$action-height: 300px;
+$action-height: 315px;
 $roster-width: 660px;
 $roster-height: 177px;
 $stage-floor-offset: 36px;
@@ -275,7 +275,7 @@ img {
     }
 }
 
-// --- Player header: identity on the outer edge, score against the centre -------
+// --- Player header: identity on the outer edge, above the stage ---------------
 
 .player-body {
     position: relative;
@@ -306,11 +306,14 @@ img {
 }
 
 .player-name {
+    min-width: 0;
+    overflow: hidden;
     font-size: $font-size-player-name;
     font-weight: 600;
     letter-spacing: -0.01em;
     color: $color-ink;
     white-space: nowrap;
+    text-overflow: ellipsis;
 }
 
 .player-name-muted {
@@ -353,7 +356,7 @@ img {
 }
 
 .player-body-stage {
-    padding-top: 0;
+    gap: 14px;
 }
 
 // --- Tug of war: one rope across the window, claimed from both ends ------------
@@ -388,30 +391,11 @@ img {
     height: $tug-rope-row-height;
 }
 
-// The names sit level with the numerals, at either end of the row they travel in
+// Nothing but the travelling score pair rides this row, and the pair is positioned
+// against it, so it is held open to the height of a numeral.
 .tug-lower {
     position: relative;
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
     height: $font-size-player-score;
-}
-
-// An absolutely positioned score pair has no baseline for the names to line up with,
-// so this zero width stand-in for a numeral supplies one.
-.tug-baseline {
-    flex: 0 0 0;
-    width: 0;
-    font-family: $font-family-mono;
-    font-size: $font-size-player-score;
-    font-weight: 700;
-    line-height: 1;
-    visibility: hidden;
-}
-
-// Sized to its name, so a long name stays whole and a travelling score just runs over it
-.tug-band .player-identity {
-    flex: 0 0 auto;
 }
 
 // Where the seam sits when the two scores are level

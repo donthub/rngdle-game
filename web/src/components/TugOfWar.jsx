@@ -1,6 +1,4 @@
-import PlayerIdentity from "./PlayerIdentity.jsx";
 import PlayerScore from "./PlayerScore.jsx";
-import { PLAYER_LABELS } from "../players.js";
 
 function leadingPlayer(p1Score, p2Score) {
     if (p1Score === p2Score) {
@@ -24,9 +22,6 @@ export default function TugOfWar({ p1, p2, leader = leadingPlayer(p1.score, p2.s
                 <span className="tug-knot"/>
             </div>
             <div className="tug-lower">
-                <PlayerIdentity player="p1" label={PLAYER_LABELS.p1} name={p1.name}/>
-                <span className="tug-baseline" aria-hidden="true">0</span>
-                <PlayerIdentity player="p2" label={PLAYER_LABELS.p2} name={p2.name} mirrored/>
                 <div className="tug-scores">
                     <PlayerScore score={p1.score} muted={leader === "p2"} className="tug-score tug-score-p1"/>
                     <span className="tug-score-gap"/>

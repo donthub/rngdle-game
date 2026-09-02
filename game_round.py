@@ -148,6 +148,8 @@ def collect_badges(page: Page, badge_queue: queue.Queue, player: str):
             collected_count += 1
 
         if page.locator(SCORE_READY).count() > 0:
+            if player == "p1":
+                badge_queue.put((player, "ANOMALY"))
             return
 
         time.sleep(BADGE_POLL_SECONDS)

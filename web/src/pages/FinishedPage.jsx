@@ -1,4 +1,5 @@
 import PlayerColumn from "../components/PlayerColumn.jsx";
+import PlayerIdentity from "../components/PlayerIdentity.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
 import TugOfWar from "../components/TugOfWar.jsx";
 import { PLAYER_LABELS } from "../players.js";
@@ -33,13 +34,18 @@ function resolveWinner(states, destroyers) {
 }
 
 // The scores stay up on the rope where they finished (see TugOfWar.jsx), so the columns
-// carry the art alone. On a draw neither side is tinted, and nobody is destroyed either.
+// carry their own name and the art. On a draw neither side is tinted, and nobody is
+// destroyed either.
 function ResultColumn({ player, state, winner, destroyed }) {
     const won = winner.player === player;
     const drawn = winner.player === null;
     return (
         <PlayerColumn player={player} active={won} winner={won}>
             <div className="player-body player-body-stage">
+                <PlayerIdentity player={player}
+                                label={PLAYER_LABELS[player]}
+                                name={state.name}
+                                mirrored={player === "p2"}/>
                 <PlayerResultPanel player={player}
                                    character={state.character}
                                    winner={won}

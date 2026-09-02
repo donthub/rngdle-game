@@ -1,15 +1,21 @@
 import InfoRounds from "../components/InfoRounds.jsx";
 import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
+import PlayerIdentity from "../components/PlayerIdentity.jsx";
 import TugOfWar from "../components/TugOfWar.jsx";
+import { PLAYER_LABELS } from "../players.js";
 
 // The scores share one rope across the top of the window (see TugOfWar.jsx), which leaves
-// the columns under it carrying the character art alone. The window is only 520px tall,
-// so this is what buys the art its full height back.
+// the columns under it carrying their own name and the character art. The window is only
+// 520px tall, so this is what buys the art most of its height back.
 function StageColumn({ player, state }) {
     return (
         <PlayerColumn player={player} active>
             <div className="player-body player-body-stage">
+                <PlayerIdentity player={player}
+                                label={PLAYER_LABELS[player]}
+                                name={state.name}
+                                mirrored={player === "p2"}/>
                 <PlayerActionPanel player={player} character={state.character} action={state.action}/>
             </div>
         </PlayerColumn>

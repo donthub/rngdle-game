@@ -145,7 +145,7 @@ function Game({ selectedRounds, onSelectRounds, onReset }) {
 
     // Only the setup page carries the bar. Both scored pages drop it, which gives the
     // character art back the 44px it would take; there the rope is the top of the window
-    // and says whose game it is (see TugOfWar.jsx).
+    // and each column names its own player (see TugOfWar.jsx).
     return (
         <div className="app">
             {gameStatus === GameStatus.WAITING ? <TopBar/> : null}

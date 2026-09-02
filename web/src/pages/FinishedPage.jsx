@@ -36,9 +36,11 @@ function resolveWinner(states, destroyers) {
 // The scores stay up on the rope where they finished (see TugOfWar.jsx), so the columns
 // carry their own name and the art. On a draw neither side is tinted, and nobody is
 // destroyed either.
-function ResultColumn({ player, state, winner, destroyed }) {
+function ResultColumn({ player, state, winner, destroyers }) {
     const won = winner.player === player;
     const drawn = winner.player === null;
+    const destroyed = destroyers.length > 0;
+    const finishedByBadge = won && destroyers.includes(player);
     return (
         <PlayerColumn player={player} active={won} winner={won}>
             <div className="player-body player-body-stage">
@@ -49,7 +51,9 @@ function ResultColumn({ player, state, winner, destroyed }) {
                 <PlayerResultPanel player={player}
                                    character={state.character}
                                    winner={won}
-                                   destroyed={destroyed && !won && !drawn}/>
+                                   destroyed={destroyed && !won && !drawn}
+                                   action={state.action}
+                                   finishedByBadge={finishedByBadge}/>
             </div>
         </PlayerColumn>
     );
@@ -57,12 +61,11 @@ function ResultColumn({ player, state, winner, destroyed }) {
 
 export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers, onReset, onExit }) {
     const winner = resolveWinner({ p1, p2 }, destroyers);
-    const destroyed = destroyers.length > 0;
     return (
         <div className="board-layout">
             <TugOfWar p1={p1} p2={p2} leader={winner.player}/>
             <div className="board-triptych">
-                <ResultColumn player="p1" state={p1} winner={winner} destroyed={destroyed}/>
+                <ResultColumn player="p1" state={p1} winner={winner} destroyers={destroyers}/>
                 <div className="center-column center-column-result">
                     <span className="section-label">Result</span>
                     <div className="result-headline">
@@ -80,7 +83,7 @@ export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers,
                         <button type="button" className="button button-secondary" onClick={onExit}>Exit</button>
                     </div>
                 </div>
-                <ResultColumn player="p2" state={p2} winner={winner} destroyed={destroyed}/>
+                <ResultColumn player="p2" state={p2} winner={winner} destroyers={destroyers}/>
             </div>
         </div>
     );

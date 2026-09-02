@@ -2,7 +2,7 @@ import { Character, ROSTER_IMAGE, ROSTER_IMAGE_HEIGHT, ROSTER_IMAGE_WIDTH } from
 
 const MAP_NAME = "GGACR_Characters_ImageMap";
 
-export default function CharacterSelector({ nextPlayer, onSelectCharacter }) {
+export default function CharacterSelector({ nextPlayer, onSelectCharacter, onHoverCharacter }) {
     return (
         <div className="character-selector">
             <span className="section-label">Select characters</span>
@@ -21,7 +21,9 @@ export default function CharacterSelector({ nextPlayer, onSelectCharacter }) {
                               onClick={event => {
                                   event.preventDefault();
                                   onSelectCharacter(character);
-                              }}/>
+                              }}
+                              onMouseEnter={() => onHoverCharacter(character)}
+                              onMouseLeave={() => onHoverCharacter(null)}/>
                     ))}
                 </map>
             </div>

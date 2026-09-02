@@ -664,6 +664,11 @@ img {
     }
 }
 
+// The hovered portrait is only a preview of the pick, so it stays faded.
+.player-character-preview {
+    opacity: 0.55;
+}
+
 // --- Rounds --------------------------------------------------------------------
 
 .section-label {

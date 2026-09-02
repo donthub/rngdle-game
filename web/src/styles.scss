@@ -106,6 +106,8 @@ $radius-button: 8px;
 $radius-card: 10px;
 $radius-pill: 999px;
 $action-fade-duration: 200ms;
+$character-enter-duration: 160ms;
+$roster-fade-duration: 140ms;
 
 *,
 *::before,
@@ -634,6 +636,13 @@ img {
     }
 }
 
+.player-character {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 14px;
+}
+
 .player-character-nameplate img {
     height: auto;
 }
@@ -641,6 +650,7 @@ img {
 .player-character-portrait {
     display: flex;
     height: $portrait-height;
+    animation: player-character-enter $character-enter-duration ease-out both;
 
     img {
         height: 100%;
@@ -648,9 +658,27 @@ img {
     }
 }
 
-// The hovered portrait is only a preview of the pick, so it stays faded.
-.player-character-preview {
-    opacity: 0.55;
+// Every swap is remounted, so the art steps in rather than cutting over
+@keyframes player-character-enter {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+// A hovered pick is captioned rather than faded, so the art is never washed out. The row
+// is held open when there is nothing to say, so the portrait keeps its place.
+.player-character-caption {
+    min-height: $font-size-label;
+    font-size: $font-size-label;
+    font-weight: 600;
+    letter-spacing: $tracking-label;
+    text-transform: uppercase;
+    color: $color-ink-soft;
 }
 
 // --- Rounds --------------------------------------------------------------------
@@ -833,10 +861,64 @@ img {
     background: $color-bg;
     border: 1px solid $color-line-soft;
     border-radius: $radius-card;
+}
+
+// The roster is a flat image with the hit areas drawn over it as polygons, so the cells
+// can be lit, ringed and dimmed (see CharacterSelector.jsx).
+.character-selector-roster {
+    position: relative;
+    width: $roster-width;
+    height: $roster-height;
 
     img {
-        width: $roster-width;
-        height: $roster-height;
+        width: 100%;
+        height: 100%;
+    }
+}
+
+.roster-overlay {
+    position: absolute;
+    inset: 0;
+}
+
+.roster-cell {
+    fill: transparent;
+    stroke: none;
+    stroke-width: 2;
+    stroke-linejoin: round;
+    pointer-events: all;
+    cursor: pointer;
+    outline: none;
+    transition: fill $roster-fade-duration ease;
+}
+
+@each $player, $tokens in $players {
+    .roster-cell-#{$player} {
+        stroke: map.get($tokens, accent);
+    }
+}
+
+// With both picks made there is nothing left to hover or click, so the cells step aside
+// and only their rings remain
+.character-selector-roster-locked .roster-cell {
+    pointer-events: none;
+    cursor: default;
+}
+
+// The cell under the pointer is ringed in the colour of whoever the click would hand it
+// to, and dashed, so a pick about to be made never reads as one already made. The ring is
+// haloed rather than the board dimmed, so no portrait is ever faded to make it stand out.
+// Keyboard focus moves the same hover, so it needs no ring of its own.
+.roster-cell-hovered {
+    stroke-width: 3;
+    stroke-dasharray: 6 4;
+}
+
+@each $player, $tokens in $players {
+    .roster-cell-hovered-#{$player} {
+        fill: rgba(map.get($tokens, accent), 0.15);
+        stroke: map.get($tokens, accent);
+        filter: drop-shadow(0 0 3px rgba(map.get($tokens, accent), 0.6));
     }
 }
 
@@ -859,6 +941,40 @@ img {
 
 .character-selector-hint-label {
     color: $color-ink-mid;
+}
+
+// The way back into a pick already made. It reads as one more word on the hint line
+// until it is hovered, so it never competes with the roster above it.
+.character-selector-reset {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    padding: 0;
+    background: none;
+    border: 0;
+    font-family: inherit;
+    font-size: $font-size-body;
+    color: $color-ink-soft;
+    cursor: pointer;
+
+    &:hover,
+    &:focus-visible {
+        color: $color-ink-hover;
+    }
+}
+
+.icon-repick {
+    width: 12px;
+    height: 12px;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+    stroke-linecap: round;
+}
+
+.icon-repick-head {
+    fill: currentColor;
+    stroke: none;
 }
 
 // --- Result --------------------------------------------------------------------

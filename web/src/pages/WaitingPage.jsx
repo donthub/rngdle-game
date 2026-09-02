@@ -24,7 +24,8 @@ function SetupColumn({ player, state, active, preview }) {
     );
 }
 
-export default function WaitingPage({ rounds, onRoundsChange, onSelectCharacter, nextPlayer, p1, p2, onStart, onExit }) {
+export default function WaitingPage({ rounds, onRoundsChange, onSelectCharacter, onResetPicks, nextPlayer,
+                                      p1, p2, onStart, onExit }) {
     const [hoveredCharacter, setHoveredCharacter] = React.useState(null);
 
     return (
@@ -35,7 +36,10 @@ export default function WaitingPage({ rounds, onRoundsChange, onSelectCharacter,
                 <RoundsSelector rounds={rounds} onRoundsChange={onRoundsChange}/>
                 <div className="divider"/>
                 <CharacterSelector nextPlayer={nextPlayer}
+                                   picks={{ p1: p1.character, p2: p2.character }}
+                                   hovered={hoveredCharacter}
                                    onSelectCharacter={onSelectCharacter}
+                                   onResetPicks={onResetPicks}
                                    onHoverCharacter={setHoveredCharacter}/>
                 <div className="divider"/>
                 <div className="button-row">

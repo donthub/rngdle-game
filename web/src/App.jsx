@@ -104,10 +104,18 @@ function Game({ selectedRounds, onSelectRounds, onReset }) {
         };
     }, []);
 
+    // The two picks are made in turn and then the roster is done. It does not wrap back
+    // round to p1, so a stray click cannot overwrite a pick that has already been made.
     const onSelectCharacter = character => {
+        if (selectedPlayerIndex >= players.length) {
+            return;
+        }
         players[selectedPlayerIndex].setCharacter(character);
-        setSelectedPlayerIndex(index => (index + 1) % players.length);
+        setSelectedPlayerIndex(index => index + 1);
     };
+    // Putting the turn back on p1 is what re-opens the roster. Both sides keep the
+    // character they have until it is picked over, so the board never goes blank.
+    const onResetPicks = selectedPlayerIndex === 0 ? null : () => setSelectedPlayerIndex(0);
     // The meter can be cut back mid-game by a game ending badge, so what the player
     // picked is kept above the reset boundary and only the selector writes to it.
     const onRoundsChange = value => {
@@ -123,7 +131,8 @@ function Game({ selectedRounds, onSelectRounds, onReset }) {
         page = <WaitingPage rounds={rounds}
                             onRoundsChange={onRoundsChange}
                             onSelectCharacter={onSelectCharacter}
-                            nextPlayer={PLAYER_KEYS[selectedPlayerIndex]}
+                            nextPlayer={PLAYER_KEYS[selectedPlayerIndex] ?? null}
+                            onResetPicks={onResetPicks}
                             p1={p1.state}
                             p2={p2.state}
                             onStart={onStart}

@@ -99,10 +99,8 @@ $tug-score-block: 182px;
 $tug-score-gap: 36px;
 // Half the score pair, so the pair can be held back from either end of the rope
 $tug-score-half: $tug-score-block + $tug-score-gap * 0.5;
-// The names share the scores' row, so the pair stops this far short of either end.
-// Names are shown whole, so this has to fit the longest one the input accepts.
-$tug-identity-max: 260px;
-$tug-scores-inset: $tug-score-half + $tug-identity-max + 20px;
+// The pair stops this far short of either end, so neither score runs off the rope
+$tug-scores-inset: $tug-score-half;
 $button-height: 42px;
 $radius-button: 8px;
 $radius-card: 10px;
@@ -411,7 +409,7 @@ img {
     visibility: hidden;
 }
 
-// Sized to its name rather than capped at the reserve, so a wide name stays whole
+// Sized to its name, so a long name stays whole and a travelling score just runs over it
 .tug-band .player-identity {
     flex: 0 0 auto;
 }
@@ -488,6 +486,8 @@ img {
 
 .tug-score {
     flex: 0 0 $tug-score-block;
+    -webkit-text-stroke: 5px $color-bg;
+    paint-order: stroke fill;
 }
 
 .tug-score-p1 {

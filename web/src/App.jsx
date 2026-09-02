@@ -130,14 +130,17 @@ function Game({ onReset }) {
                              onExit={onExit}/>;
     } else {
         page = <InProgressPage currentRound={displayedRound}
-                               rounds={rounds}
-                               p1={p1.state}
-                               p2={p2.state}/>;
+                       rounds={rounds}
+                       p1={p1.state}
+                       p2={p2.state}/>;
     }
 
+    // Only the setup page carries the bar. Both scored pages drop it, which gives the
+    // character art back the 44px it would take; there the rope is the top of the window
+    // and says whose game it is (see TugOfWar.jsx).
     return (
         <div className="app">
-            <TopBar gameStatus={gameStatus}/>
+            {gameStatus === GameStatus.WAITING ? <TopBar/> : null}
             <div className="game-body">
                 {page}
             </div>

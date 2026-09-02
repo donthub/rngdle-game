@@ -59,14 +59,6 @@ $winner-colors: (
     "draw": $color-draw
 );
 
-// Game status dot: neutral on purpose, so the two accents stay player-only
-$status-dots: (
-    "waiting": transparent,
-    "in-progress": $color-ink,
-    "finished": $color-ink-soft,
-    "exited": $color-ink-soft
-);
-
 // Type
 $font-family-ui: "Space Grotesk", "Helvetica Neue", ui-sans-serif, sans-serif;
 $font-family-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, monospace;
@@ -99,6 +91,17 @@ $stage-floor-width: 460px;
 $destroyed-width: 360px;
 $destroyed-offset: 30px;
 $destroyed-stamp-duration: 320ms;
+$tug-band-height: 98px;
+$tug-rope-row-height: 32px;
+$tug-rope-weight: 6px;
+$tug-rope-centre: 23px;
+$tug-score-block: 182px;
+$tug-score-gap: 36px;
+// Half the score pair, so the pair can be held back from either end of the rope
+$tug-score-half: $tug-score-block + $tug-score-gap * 0.5;
+// The names share the scores' row, so the pair stops this far short of either end
+$tug-identity-max: 180px;
+$tug-scores-inset: $tug-score-half + $tug-identity-max + 20px;
 $button-height: 42px;
 $radius-button: 8px;
 $radius-card: 10px;
@@ -152,13 +155,12 @@ img {
     display: flex;
     flex: 0 0 $topbar-height;
     align-items: center;
-    justify-content: space-between;
     padding: 0 24px;
     background: $color-surface;
     border-bottom: 1px solid $color-line;
 }
 
-.top-bar-brand {
+.game-brand {
     display: flex;
     align-items: baseline;
     gap: 12px;
@@ -172,46 +174,12 @@ img {
     color: $color-ink;
 }
 
-.top-bar-subtitle {
+.brand-subtitle {
     font-size: $font-size-label;
     font-weight: 500;
     letter-spacing: $tracking-label;
     text-transform: uppercase;
     color: $color-ink-soft;
-}
-
-.game-status {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    height: 26px;
-    padding: 0 12px 0 10px;
-    background: $color-bg;
-    border: 1px solid $color-line;
-    border-radius: $radius-pill;
-}
-
-.game-status-dot {
-    width: 7px;
-    height: 7px;
-    border-radius: 50%;
-}
-
-@each $status, $color in $status-dots {
-    .game-status-dot-#{$status} {
-        background: $color;
-
-        @if $color == transparent {
-            border: 1.5px solid $color-ink-soft;
-        }
-    }
-}
-
-.game-status-label {
-    font-size: $font-size-body;
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    color: $color-ink-mid;
 }
 
 // --- Triptych ------------------------------------------------------------------
@@ -289,10 +257,6 @@ img {
     .#{$player}-column-winner {
         background: map.get($tokens, tint);
 
-        .player-divider {
-            background: map.get($tokens, rule);
-        }
-
         .player-stage-floor {
             background: map.get($tokens, line);
         }
@@ -324,22 +288,15 @@ img {
     min-height: 0;
 }
 
-.player-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 24px;
-}
-
-.player-header-mirrored {
-    flex-direction: row-reverse;
-}
-
 .player-identity {
     display: flex;
     align-items: baseline;
     gap: 10px;
     min-width: 0;
+}
+
+.player-identity-mirrored {
+    flex-direction: row-reverse;
 }
 
 .player-tag {
@@ -398,11 +355,154 @@ img {
     }
 }
 
-.player-divider {
-    height: 1px;
-    margin-top: 15px;
-    background: $color-line-soft;
+.player-body-stage {
+    padding-top: 0;
 }
+
+// --- Tug of war: one rope across the window, claimed from both ends ------------
+
+// The play and result pages stack a band over the triptych, so they need a column of
+// their own inside .game-body (which is a row for the setup page).
+.board-layout {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.board-triptych {
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
+
+.tug-band {
+    display: flex;
+    flex: 0 0 $tug-band-height;
+    flex-direction: column;
+    padding: 16px 44px 8px;
+    background: $color-surface;
+    border-bottom: 1px solid $color-line;
+}
+
+// Nothing shares this row, so the rope runs the full width of the window
+.tug-rope {
+    position: relative;
+    height: $tug-rope-row-height;
+}
+
+// The names sit level with the numerals, at either end of the row they travel in
+.tug-lower {
+    position: relative;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    height: $font-size-player-score;
+}
+
+// An absolutely positioned score pair has no baseline for the names to line up with,
+// so this zero width stand-in for a numeral supplies one.
+.tug-baseline {
+    flex: 0 0 0;
+    width: 0;
+    font-family: $font-family-mono;
+    font-size: $font-size-player-score;
+    font-weight: 700;
+    line-height: 1;
+    visibility: hidden;
+}
+
+.tug-band .player-identity {
+    flex: 0 1 auto;
+    max-width: $tug-identity-max;
+}
+
+// Where the seam sits when the two scores are level
+.tug-even-label {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    font-size: $font-size-label;
+    font-weight: 600;
+    line-height: 1;
+    letter-spacing: $tracking-label;
+    text-transform: uppercase;
+    color: $color-ink-faint;
+    transform: translateX(-50%);
+}
+
+.tug-even-tick {
+    position: absolute;
+    top: 13px;
+    left: 50%;
+    width: 1px;
+    height: 7px;
+    background: $color-ink-ghost;
+}
+
+// The two stretches abut at --tug-seam, so the split on screen is the ratio itself
+.tug-rope-side {
+    position: absolute;
+    top: $tug-rope-centre - $tug-rope-weight * 0.5;
+    height: $tug-rope-weight;
+}
+
+.tug-rope-p1 {
+    left: 0;
+    width: var(--tug-seam);
+    background: $color-p1;
+}
+
+.tug-rope-p2 {
+    right: 0;
+    left: var(--tug-seam);
+    background: $color-p2;
+}
+
+// Before the first award there is no claim to draw, so the whole rope reads as track
+.tug-band-level {
+    .tug-rope-p1,
+    .tug-rope-p2 {
+        background: $color-track;
+    }
+}
+
+.tug-knot {
+    position: absolute;
+    top: $tug-rope-centre - $tug-rope-weight * 0.5 - 5px;
+    left: var(--tug-seam);
+    width: 2px;
+    height: $tug-rope-weight + 10px;
+    background: $color-ink;
+    transform: translateX(-50%);
+}
+
+// The pair rides the seam, held back from either end so neither score runs off the rope
+.tug-scores {
+    position: absolute;
+    top: 0;
+    left: clamp(#{$tug-scores-inset}, var(--tug-seam), calc(100% - #{$tug-scores-inset}));
+    display: flex;
+    align-items: baseline;
+    transform: translateX(-50%);
+}
+
+.tug-score {
+    flex: 0 0 $tug-score-block;
+}
+
+.tug-score-p1 {
+    justify-content: flex-end;
+}
+
+.tug-score-p2 {
+    justify-content: flex-start;
+}
+
+.tug-score-gap {
+    flex: 0 0 $tug-score-gap;
+}
+
 
 // --- Stage: art stands on a hairline floor with a soft contact shadow ----------
 

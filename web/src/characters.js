@@ -1,3 +1,5 @@
+import { MOVE_IMAGES } from "virtual:move-images";
+
 export const ROSTER_IMAGE = "/assets/GGACR_Roster.png";
 export const ROSTER_IMAGE_WIDTH = 660;
 export const ROSTER_IMAGE_HEIGHT = 177;
@@ -32,4 +34,15 @@ export const Character = Object.freeze({
 
 export function characterAssetUrl(character, asset) {
     return `/assets/characters/${character.id}/${asset}.png`;
+}
+
+// Win poses live in the win directory under public/assets/characters/{character id}, the
+// same way the move images do (see badges.js). The idle art stands in for a character
+// with no win pose indexed.
+export function randomCharacterWinImage(character) {
+    const images = MOVE_IMAGES[character.id]?.win;
+    if (images === undefined || images.length === 0) {
+        return characterAssetUrl(character, "idle");
+    }
+    return images[Math.floor(Math.random() * images.length)];
 }

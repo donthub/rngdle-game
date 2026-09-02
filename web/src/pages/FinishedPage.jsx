@@ -1,25 +1,35 @@
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
 import TugOfWar from "../components/TugOfWar.jsx";
+import { PLAYER_LABELS } from "../players.js";
 
 const WINNERS = Object.freeze({
-    p1: { subject: "Player 1", predicate: "wins!", className: "winner-p1", player: "p1" },
-    p2: { subject: "Player 2", predicate: "wins!", className: "winner-p2", player: "p2" },
+    p1: { predicate: "wins!", className: "winner-p1", player: "p1" },
+    p2: { predicate: "wins!", className: "winner-p2", player: "p2" },
 });
+
+const DRAW = Object.freeze({ subject: "Draw!", predicate: null, className: "winner-draw", player: null });
+
+// The winner is announced by the name its player typed, falling back to the P1/P2 label
+// while that is still blank (the same fallback PlayerIdentity uses).
+function announce(player, states) {
+    const name = states[player].name;
+    return { ...WINNERS[player], subject: name === "" ? PLAYER_LABELS[player] : name };
+}
 
 // A game ending badge is rare enough that rolling one alone takes the game, however the
 // scores landed; if both sides rolled one the scores settle it as usual (see badges.js).
-function resolveWinner(p1Score, p2Score, destroyers) {
+function resolveWinner(states, destroyers) {
     if (destroyers.length === 1) {
-        return WINNERS[destroyers[0]];
+        return announce(destroyers[0], states);
     }
-    if (p1Score > p2Score) {
-        return WINNERS.p1;
+    if (states.p1.score > states.p2.score) {
+        return announce("p1", states);
     }
-    if (p2Score > p1Score) {
-        return WINNERS.p2;
+    if (states.p2.score > states.p1.score) {
+        return announce("p2", states);
     }
-    return { subject: "Draw!", predicate: null, className: "winner-draw", player: null };
+    return DRAW;
 }
 
 // The scores stay up on the rope where they finished (see TugOfWar.jsx), so the columns
@@ -40,7 +50,7 @@ function ResultColumn({ player, state, winner, destroyed }) {
 }
 
 export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers, onReset, onExit }) {
-    const winner = resolveWinner(p1.score, p2.score, destroyers);
+    const winner = resolveWinner({ p1, p2 }, destroyers);
     const destroyed = destroyers.length > 0;
     return (
         <div className="board-layout">

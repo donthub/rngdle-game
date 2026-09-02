@@ -99,8 +99,9 @@ $tug-score-block: 182px;
 $tug-score-gap: 36px;
 // Half the score pair, so the pair can be held back from either end of the rope
 $tug-score-half: $tug-score-block + $tug-score-gap * 0.5;
-// The names share the scores' row, so the pair stops this far short of either end
-$tug-identity-max: 180px;
+// The names share the scores' row, so the pair stops this far short of either end.
+// Names are shown whole, so this has to fit the longest one the input accepts.
+$tug-identity-max: 260px;
 $tug-scores-inset: $tug-score-half + $tug-identity-max + 20px;
 $button-height: 42px;
 $radius-button: 8px;
@@ -307,12 +308,10 @@ img {
 }
 
 .player-name {
-    overflow: hidden;
     font-size: $font-size-player-name;
     font-weight: 600;
     letter-spacing: -0.01em;
     color: $color-ink;
-    text-overflow: ellipsis;
     white-space: nowrap;
 }
 
@@ -412,9 +411,9 @@ img {
     visibility: hidden;
 }
 
+// Sized to its name rather than capped at the reserve, so a wide name stays whole
 .tug-band .player-identity {
-    flex: 0 1 auto;
-    max-width: $tug-identity-max;
+    flex: 0 0 auto;
 }
 
 // Where the seam sits when the two scores are level
@@ -868,11 +867,15 @@ img {
 
 // --- Result --------------------------------------------------------------------
 
+// A long winning name wraps under itself rather than running out of the column
 .result-headline {
     display: flex;
+    flex-wrap: wrap;
     align-items: baseline;
+    justify-content: center;
     gap: 11px;
     margin-top: 12px;
+    text-align: center;
 }
 
 .result-subject,

@@ -1,3 +1,4 @@
+@use "sass:color";
 @use "sass:map";
 
 // Design tokens for the minimalist light theme. Values are authored in oklch and
@@ -121,7 +122,7 @@ $action-fade-duration: 200ms;
 $character-enter-duration: 160ms;
 $roster-fade-duration: 140ms;
 $name-clear-fade-duration: 140ms;
-$badge-fade-duration: 200ms;
+$tally-pop-duration: 260ms;
 
 *,
 *::before,
@@ -287,7 +288,7 @@ img {
     }
 }
 
-// --- Player header: identity on the outer edge, badge on the inner one ---------
+// --- Player identity and tally ------------------------------------------------
 
 .player-body {
     position: relative;
@@ -299,19 +300,7 @@ img {
     min-height: 0;
 }
 
-// Holds the identity and the badge chip apart at either end of the column, so the chip
-// keeps the corner nearest the centre while the name stays out on the edge.
-.player-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: 16px;
-}
-
-.player-header-mirrored {
-    flex-direction: row-reverse;
-}
-
+// Stretched across the column, so a mirrored row packs the name against the outer edge
 .player-identity {
     display: flex;
     align-items: baseline;
@@ -323,36 +312,102 @@ img {
     flex-direction: row-reverse;
 }
 
-// The rarity of the last badge rolled, set in the quiet type of a section label so the hue
-// is all that marks how rare it was, with a wash of that hue behind it rather than a ring
-// around it. A change of rarity remounts the chip, so the new rarity fades over the old
-// rather than cutting over it; a repeat of the rarity already up leaves it standing
-// untouched (see PlayerBadge.jsx).
-.player-badge {
+// The ladder of chips itself, hung from the name down the column's outer edge and drawn
+// over the stage beside it: the move art is centred and renders wider than the column it
+// stands in, so there is no edge it does not reach (see PlayerTally.jsx).
+.player-tally {
+    position: absolute;
+    top: 0;
+    z-index: 2;
+    display: flex;
     flex: none;
-    padding: 3px 9px;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.player-tally-p1 {
+    left: 0;
+    align-items: flex-start;
+}
+
+.player-tally-p2 {
+    right: 0;
+    align-items: flex-end;
+}
+
+// Every chip is the same shape whatever it is holding: the hue it rolled in and the
+// number. The border is carried by all of them and only coloured on one, so outlining
+// the latest costs the ladder no width (see PlayerTally.jsx).
+.player-tally-chip {
+    display: flex;
+    gap: 5px;
+    align-items: baseline;
+    padding: 3px 8px;
+    border: 1px solid transparent;
     border-radius: $radius-pill;
-    font-size: $font-size-label;
-    font-weight: 600;
-    letter-spacing: $tracking-label;
-    text-transform: uppercase;
     white-space: nowrap;
-    animation: player-badge-fade-in $badge-fade-duration ease-in both;
 }
 
+// The rarity that just landed, outlined in its own hue. It is keyed on the roll, so it
+// steps forward again for a repeat of the rarity already up rather than standing still.
+.player-tally-chip-latest {
+    animation: player-tally-pop $tally-pop-duration cubic-bezier(0.2, 0.7, 0.3, 1) both;
+}
+
+.player-tally-dot {
+    align-self: center;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+}
+
+.player-tally-count {
+    font-family: $font-family-mono;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+}
+
+// One hue per rarity as ever, but mixed into the ground behind the chip rather than
+// washed over it: at 7% alpha the character art under the rail comes straight through.
 @each $rarity, $accent in $badge-rarities {
-    .player-badge-#{$rarity} {
-        background: rgba($accent, 0.07);
-        color: rgba($accent, 0.85);
+    .player-tally-chip-#{$rarity} {
+        background: color.mix($accent, $color-bg, 7%);
+
+        .player-tally-dot {
+            background: $accent;
+        }
+
+        .player-tally-count {
+            color: $accent;
+        }
+
+        &.player-tally-chip-latest {
+            border-color: rgba($accent, 0.55);
+        }
     }
 }
 
-@keyframes player-badge-fade-in {
-    from {
-        opacity: 0;
+// A winning column is tinted, so the chips standing on it are mixed into that tint
+// instead and sit on it the way they sit on the board (see FinishedPage.jsx).
+@each $player, $tokens in $players {
+    @each $rarity, $accent in $badge-rarities {
+        .#{$player}-column-winner .player-tally-chip-#{$rarity} {
+            background: color.mix($accent, map.get($tokens, tint), 7%);
+        }
     }
-    to {
-        opacity: 1;
+}
+
+@keyframes player-tally-pop {
+    0% {
+        transform: scale(1);
+    }
+    35% {
+        transform: scale(1.07);
+    }
+    100% {
+        transform: scale(1);
     }
 }
 
@@ -546,6 +601,16 @@ img {
 
 
 // --- Stage: art stands on a hairline floor with a soft contact shadow ----------
+
+// The stage and the tally rail share this box. The rail is positioned against it and
+// stays outside the stage, which is mirrored whole for p2 below - inside it, the chips
+// would be flipped along with the art.
+.player-stage-area {
+    position: relative;
+    display: flex;
+    flex: 1 1 auto;
+    min-height: 0;
+}
 
 .player-stage {
     position: relative;

@@ -1,6 +1,7 @@
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerIdentity from "../components/PlayerIdentity.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
+import PlayerTally from "../components/PlayerTally.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
@@ -36,6 +37,10 @@ function resolveWinner(states, destroyers) {
 // The scores stay up on the line where they finished (see ScoreLine.jsx), so the columns
 // carry their own name and the art. On a draw neither side is tinted, and nobody is
 // destroyed either.
+//
+// The tally stays up as well, so the game can be read back off it: what each side rolled,
+// and how much of it. Nothing is landing any more, so no chip is outlined as the latest
+// (see PlayerTally.jsx).
 function ResultColumn({ player, state, winner, destroyers }) {
     const won = winner.player === player;
     const drawn = winner.player === null;
@@ -48,12 +53,15 @@ function ResultColumn({ player, state, winner, destroyers }) {
                 <PlayerIdentity player={player}
                                 name={state.name}
                                 mirrored={player === "p2"}/>
-                <PlayerResultPanel player={player}
-                                   character={state.character}
-                                   winner={won}
-                                   destroyed={gameWasCut && !won && !drawn}
-                                   action={state.action}
-                                   finishedByBadge={finishedByBadge}/>
+                <div className="player-stage-area">
+                    <PlayerResultPanel player={player}
+                                       character={state.character}
+                                       winner={won}
+                                       destroyed={gameWasCut && !won && !drawn}
+                                       action={state.action}
+                                       finishedByBadge={finishedByBadge}/>
+                    <PlayerTally player={player} badges={state.badges} settled/>
+                </div>
             </div>
         </PlayerColumn>
     );

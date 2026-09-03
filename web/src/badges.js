@@ -17,10 +17,17 @@ export function isGameEndingBadge(badge) {
     return GAME_ENDING_BADGES.includes(badge);
 }
 
-// A rarity the board has no move type for is one it has never seen, so it is neither
-// drawn on the stage nor named on the chip (see PlayerBadge.jsx).
-export function isKnownBadge(badge) {
-    return BADGE_MOVE_TYPES[badge] !== undefined;
+// The tally is read as a fixed ladder with the rarest at the top, which is the order the
+// move types above are written in, backwards (see PlayerTally.jsx).
+const BADGE_LADDER = Object.freeze(Object.keys(BADGE_MOVE_TYPES).reverse());
+
+// The rarities a player has rolled, rarest first, with how many of each. A rarity the
+// board has no move type for is one it has never seen, so it has no hue either: it is
+// left off the ladder the same way it is left off the stage.
+export function rolledBadges(counts) {
+    return BADGE_LADDER
+        .filter(badge => counts[badge] > 0)
+        .map(badge => ({ badge, count: counts[badge] }));
 }
 
 export function resolveBadgeMoveImage(badge, character, previousImage = null) {

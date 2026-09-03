@@ -1,30 +1,27 @@
 import InfoRounds from "../components/InfoRounds.jsx";
 import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
-import PlayerBadge from "../components/PlayerBadge.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerIdentity from "../components/PlayerIdentity.jsx";
+import PlayerTally from "../components/PlayerTally.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
-import classNames from "../classNames.js";
 
 // The scores share one line across the top of the window (see ScoreLine.jsx), which leaves
 // the columns under it carrying their own name and the character art. The window is only
 // 520px tall, so this is what buys the art most of its height back.
 //
-// The header row is mirrored for p2 along with the identity inside it, which keeps every
-// name on the outer edge of its column and every badge chip in the corner nearest the
-// centre, where the move that earned it is being watched.
+// The identity is mirrored for p2, which keeps every name on the outer edge of its column,
+// and the tally hangs from it on that same edge (see PlayerTally.jsx).
 function StageColumn({ player, state }) {
-    const mirrored = player === "p2";
     return (
         <PlayerColumn player={player} active>
             <div className="player-body player-body-stage">
-                <div className={classNames("player-header", mirrored && "player-header-mirrored")}>
-                    <PlayerIdentity player={player}
-                                    name={state.name}
-                                    mirrored={mirrored}/>
-                    <PlayerBadge badge={state.badge}/>
+                <PlayerIdentity player={player}
+                                name={state.name}
+                                mirrored={player === "p2"}/>
+                <div className="player-stage-area">
+                    <PlayerActionPanel player={player} character={state.character} action={state.action}/>
+                    <PlayerTally player={player} badges={state.badges}/>
                 </div>
-                <PlayerActionPanel player={player} character={state.character} action={state.action}/>
             </div>
         </PlayerColumn>
     );

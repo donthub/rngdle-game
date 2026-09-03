@@ -11,6 +11,9 @@ import { PLAYER_KEYS } from "./players.js";
 import useCountUp from "./useCountUp.js";
 import useLatestRef from "./useLatestRef.js";
 
+// Nothing rolled yet: no rarity counted, none the latest, no roll to step to.
+const EMPTY_BADGES = Object.freeze({ counts: Object.freeze({}), latest: null, roll: 0 });
+
 const DEFAULT_SETUP = Object.freeze({
     rounds: 5,
     p1: { name: "", character: Character.SOL },
@@ -22,7 +25,7 @@ function usePlayer(setup) {
     const [score, setScore] = React.useState(0);
     const [character, setCharacter] = React.useState(setup.character);
     const [action, setAction] = React.useState(null);
-    const [badge, setBadge] = React.useState(null);
+    const [badges, setBadges] = React.useState(EMPTY_BADGES);
 
     // The panels show the counting value; the awarded total stays behind it
     // until the animation catches up.
@@ -32,17 +35,22 @@ function usePlayer(setup) {
     const characterRef = useLatestRef(character);
 
     return {
-        state: { name, score: countedScore, character, action, badge, onNameChange: setName },
+        state: { name, score: countedScore, character, action, badges, onNameChange: setName },
         isCountingUp: countedScore !== score,
         setCharacter,
         getName: () => nameRef.current,
         addScore: value => setScore(previousScore => previousScore + Number(value)),
-        // Only the rarity of the last badge is kept: the chip has nothing to say about a
-        // repeat of the rarity already up beside it (see PlayerBadge.jsx).
+        // Every badge is counted under its rarity, and the roll it landed on is kept beside
+        // the count: that is what steps the chip forward when the rarity already named is
+        // the one that came round again (see PlayerTally.jsx).
         addBadge: rarity => {
             setAction(previousImage =>
                 resolveBadgeMoveImage(rarity, characterRef.current, previousImage) ?? previousImage);
-            setBadge(rarity);
+            setBadges(previousBadges => ({
+                counts: { ...previousBadges.counts, [rarity]: (previousBadges.counts[rarity] ?? 0) + 1 },
+                latest: rarity,
+                roll: previousBadges.roll + 1,
+            }));
         },
     };
 }

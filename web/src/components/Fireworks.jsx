@@ -107,7 +107,6 @@ export default function Fireworks() {
         }
 
         const context = canvas.getContext("2d");
-        context.lineCap = "round";
         const colors = readColors(canvas);
 
         let width = 0;
@@ -119,7 +118,7 @@ export default function Fireworks() {
             canvas.width = Math.round(width * ratio);
             canvas.height = Math.round(height * ratio);
             context.setTransform(ratio, 0, 0, ratio, 0, 0);
-            context.lineCap = "round";
+            context.lineCap = "round"; // sizing the canvas resets the context state
         };
         resize();
         const observer = new ResizeObserver(resize);
@@ -129,6 +128,7 @@ export default function Fireworks() {
         let sparks = [];
         let launchIn = 0;
         let previousTimestamp = null;
+        let frame = null;
 
         const step = timestamp => {
             const elapsed = previousTimestamp === null
@@ -174,7 +174,7 @@ export default function Fireworks() {
             frame = requestAnimationFrame(step);
         };
 
-        let frame = requestAnimationFrame(step);
+        frame = requestAnimationFrame(step);
         return () => {
             cancelAnimationFrame(frame);
             observer.disconnect();

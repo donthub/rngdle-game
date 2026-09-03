@@ -4,7 +4,7 @@ import PlayerBadge from "../components/PlayerBadge.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerIdentity from "../components/PlayerIdentity.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
-import { PLAYER_LABELS } from "../players.js";
+import classNames from "../classNames.js";
 
 // The scores share one line across the top of the window (see ScoreLine.jsx), which leaves
 // the columns under it carrying their own name and the character art. The window is only
@@ -18,9 +18,8 @@ function StageColumn({ player, state }) {
     return (
         <PlayerColumn player={player} active>
             <div className="player-body player-body-stage">
-                <div className={`player-header${mirrored ? " player-header-mirrored" : ""}`}>
+                <div className={classNames("player-header", mirrored && "player-header-mirrored")}>
                     <PlayerIdentity player={player}
-                                    label={PLAYER_LABELS[player]}
                                     name={state.name}
                                     mirrored={mirrored}/>
                     <PlayerBadge badge={state.badge}/>

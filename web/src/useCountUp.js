@@ -1,7 +1,7 @@
 import React from "react";
 
 // The smallest awards are around 2,000 points and should run for three
-// seconds. Scaling on the cube root from there keeps the five figure awards
+// seconds. Scaling from there on the fourth root keeps the five figure awards
 // in range: ten times the award is only about twice the run.
 const REFERENCE_AMOUNT = 2000;
 const REFERENCE_DURATION_MS = 3000;

@@ -93,15 +93,15 @@ function Game({ setup, onRematch, onReset }) {
         }
     };
 
-    // Imperative bridge used by the Playwright driver (see game.py).
+    // Imperative bridge used by the Playwright driver (see game_api.py). Everything a
+    // player owns is addressed by player key, so the driver names the side rather than
+    // reaching for a method of its own per player.
     React.useEffect(() => {
         window.gameApi = {
             // Setters
             setCurrentRound: value => setCurrentRound(Number(value)),
-            addP1Score: value => p1.addScore(value),
-            addP2Score: value => p2.addScore(value),
-            addP1Badge: value => addBadge("p1", value),
-            addP2Badge: value => addBadge("p2", value),
+            addScore: (player, value) => playersByKey[player].addScore(value),
+            addBadge: (player, value) => addBadge(player, value),
             finishGame: () => setFinishRequested(true),
 
             // Getters
@@ -109,8 +109,7 @@ function Game({ setup, onRematch, onReset }) {
             isFinished: () => gameStatusRef.current === GameStatus.FINISHED,
             isExited: () => gameStatusRef.current === GameStatus.EXITED,
             getRounds: () => roundsRef.current,
-            getP1Name: () => p1.getName(),
-            getP2Name: () => p2.getName(),
+            getName: player => playersByKey[player].getName(),
         };
         return () => {
             delete window.gameApi;

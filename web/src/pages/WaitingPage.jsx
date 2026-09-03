@@ -5,7 +5,6 @@ import PlayerCharacter from "../components/PlayerCharacter.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerNameSelector from "../components/PlayerNameSelector.jsx";
 import RoundsSelector from "../components/RoundsSelector.jsx";
-import { PLAYER_LABELS } from "../players.js";
 
 // The side receiving the next character pick is the active one, and it shows the
 // hovered portrait in place of its own until the pointer leaves the roster.
@@ -14,7 +13,6 @@ function SetupColumn({ player, state, active, preview }) {
         <PlayerColumn player={player} active={active}>
             <div className="player-setup">
                 <PlayerNameSelector player={player}
-                                    label={PLAYER_LABELS[player]}
                                     name={state.name}
                                     active={active}
                                     onNameChange={state.onNameChange}/>

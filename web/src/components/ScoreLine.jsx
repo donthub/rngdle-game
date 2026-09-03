@@ -1,3 +1,4 @@
+import classNames from "../classNames.js";
 import PlayerScore from "./PlayerScore.jsx";
 
 function leadingPlayer(p1Score, p2Score) {
@@ -13,7 +14,8 @@ export default function ScoreLine({ p1, p2, leader = leadingPlayer(p1.score, p2.
     const level = total === 0;
     const seam = `${((level ? 0.5 : p1.score / total) * 100).toFixed(3)}%`;
     return (
-        <div className={`score-line-band${level ? " score-line-band-level" : ""}`} style={{ "--score-line-seam": seam }}>
+        <div className={classNames("score-line-band", level && "score-line-band-level")}
+             style={{ "--score-line-seam": seam }}>
             <div className="score-line-row">
                 <span className="score-line-even-label">Even</span>
                 <span className="score-line-even-tick"/>

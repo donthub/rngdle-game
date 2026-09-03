@@ -4,10 +4,12 @@ from pathlib import Path
 
 import game
 
-CONFIG_PATH = Path(__file__).resolve().parent / "config.json"
+PROJECT_DIR = Path(__file__).resolve().parent
+CONFIG_PATH = PROJECT_DIR / "config.json"
+LOG_PATH = PROJECT_DIR / "app.log"
 
 
-def setup_logging(log_file: str = "app.log", level=logging.INFO) -> None:
+def setup_logging(log_file: Path = LOG_PATH, level: int = logging.INFO) -> None:
     logging.basicConfig(
         level=level,
         format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",

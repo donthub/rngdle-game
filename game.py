@@ -23,14 +23,14 @@ def run(config: dict):
         game_api = GameApi(page)
         game_api.wait_until_ready()
 
+        # A game leaves the result page either for a fresh setup or for the exit, and
+        # the wait below falls straight through in the latter case.
         while True:
             game_api.wait_until_started_or_exited()
             if game_api.is_exited():
                 break
 
             play_game(game_api)
-            if game_api.is_exited():
-                break
 
         context.close()
 

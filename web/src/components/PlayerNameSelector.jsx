@@ -1,3 +1,6 @@
+import classNames from "../classNames.js";
+import { PLAYER_LABELS } from "../players.js";
+
 // A cross drawn on the same 12px grid as the other inline icons
 function ClearIcon() {
     return (
@@ -7,9 +10,10 @@ function ClearIcon() {
     );
 }
 
-export default function PlayerNameSelector({ player, label, name, active, onNameChange }) {
+export default function PlayerNameSelector({ player, name, active, onNameChange }) {
+    const label = PLAYER_LABELS[player];
     return (
-        <div className={`name-field${active ? ` ${player}-name-field-active` : ""}`}>
+        <div className={classNames("name-field", active && `${player}-name-field-active`)}>
             <span className={`player-tag ${player}-tag`}>{player.toUpperCase()}</span>
             <input type="text"
                    className="name-field-input"

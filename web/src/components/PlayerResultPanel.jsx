@@ -1,6 +1,7 @@
 import React from "react";
 
 import { characterAssetUrl, randomCharacterWinImage } from "../characters.js";
+import classNames from "../classNames.js";
 import PlayerStage from "./PlayerStage.jsx";
 
 const DESTROYED_IMAGE = "/assets/destroyed.png";
@@ -17,10 +18,10 @@ export default function PlayerResultPanel({ player, character, winner, destroyed
     const resultImage = winner ? winImage : characterAssetUrl(character, result);
     const image = finishedByBadge ? shownImage : resultImage;
     // Art the player is already looking at stays put; only a swap is faded in.
-    const fadeIn = image === shownImage ? "" : " player-action-current";
+    const swapped = image !== shownImage;
     return (
         <PlayerStage player={player}>
-            <img className={`player-action-image${fadeIn}`}
+            <img className={classNames("player-action-image", swapped && "player-action-current")}
                  alt={`${character.name} ${image === action ? "move" : result}`}
                  src={image}/>
             {destroyed ?

@@ -6,7 +6,8 @@ from playwright.sync_api import BrowserContext, Page, Playwright
 logger = logging.getLogger(__name__)
 
 
-def launch_app_window(playwright: Playwright, url: str, position: tuple, size: tuple) -> tuple[BrowserContext, Page]:
+def launch_app_window(playwright: Playwright, url: str, position: tuple[int, int],
+                      size: tuple[int, int]) -> tuple[BrowserContext, Page]:
     x, y = position
     width, height = size
 

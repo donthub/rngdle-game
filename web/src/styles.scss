@@ -281,10 +281,6 @@ img {
         }
     }
 
-    .#{$player}-tag-muted {
-        color: map.get($tokens, line);
-    }
-
     .#{$player}-name-field-active {
         border-bottom: 1.5px solid map.get($tokens, accent);
         caret-color: map.get($tokens, accent);

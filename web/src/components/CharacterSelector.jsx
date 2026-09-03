@@ -1,4 +1,5 @@
 import { Character, ROSTER_IMAGE, ROSTER_IMAGE_HEIGHT, ROSTER_IMAGE_WIDTH } from "../characters.js";
+import classNames from "../classNames.js";
 import { PLAYER_KEYS } from "../players.js";
 
 const CHARACTERS = Object.values(Character);
@@ -7,14 +8,10 @@ const CHARACTERS = Object.values(Character);
 // as SVG rather than an image map is what makes them styleable: the art is left alone and
 // the state is carried by rings over it - solid for a pick made, dashed for one hovered.
 function cellClass(owner, hovered, nextPlayer) {
-    const classes = ["roster-cell"];
-    if (owner) {
-        classes.push(`roster-cell-picked roster-cell-${owner}`);
-    }
-    if (hovered) {
-        classes.push(`roster-cell-hovered roster-cell-hovered-${nextPlayer}`);
-    }
-    return classes.join(" ");
+    return classNames(
+        "roster-cell",
+        owner && `roster-cell-picked roster-cell-${owner}`,
+        hovered && `roster-cell-hovered roster-cell-hovered-${nextPlayer}`);
 }
 
 // A quiet circular arrow, sized to sit on the hint line next to its label
@@ -37,7 +34,8 @@ export default function CharacterSelector({ nextPlayer, picks, hovered, onSelect
         <div className="character-selector">
             <span className="section-label">Select characters</span>
             <div className="character-selector-panel">
-                <div className={`character-selector-roster${locked ? " character-selector-roster-locked" : ""}`}>
+                <div className={classNames("character-selector-roster",
+                    locked && "character-selector-roster-locked")}>
                     <img src={ROSTER_IMAGE} width={ROSTER_IMAGE_WIDTH} height={ROSTER_IMAGE_HEIGHT}
                          alt="Guilty Gear XX Accent Core Plus R roster"/>
                     <svg className="roster-overlay"

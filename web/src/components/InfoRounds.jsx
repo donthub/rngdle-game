@@ -29,7 +29,7 @@ export default function InfoRounds({ currentRound, rounds }) {
                         <span key={round} className={meterClass("round-meter-bar", round, currentRound)}/>
                     ))}
                 </div>
-                {roundNumbers.length > MAX_METER_LABELS ? null : (
+                {rounds > MAX_METER_LABELS ? null : (
                     <div className="round-meter-labels">
                         {roundNumbers.map(round => (
                             <span key={round} className={meterClass("round-meter-label", round, currentRound)}>

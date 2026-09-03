@@ -4,18 +4,18 @@ import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
-const WINNERS = Object.freeze({
-    p1: { predicate: "wins!", className: "winner-p1", player: "p1" },
-    p2: { predicate: "wins!", className: "winner-p2", player: "p2" },
-});
-
 const DRAW = Object.freeze({ subject: "Draw!", predicate: null, className: "winner-draw", player: null });
 
 // The winner is announced by the name its player typed, falling back to the P1/P2 label
 // while that is still blank (the same fallback PlayerIdentity uses).
 function announce(player, states) {
     const name = states[player].name;
-    return { ...WINNERS[player], subject: name === "" ? PLAYER_LABELS[player] : name };
+    return {
+        subject: name === "" ? PLAYER_LABELS[player] : name,
+        predicate: "wins!",
+        className: `winner-${player}`,
+        player,
+    };
 }
 
 // A game ending badge is rare enough that rolling one alone takes the game, however the
@@ -39,19 +39,19 @@ function resolveWinner(states, destroyers) {
 function ResultColumn({ player, state, winner, destroyers }) {
     const won = winner.player === player;
     const drawn = winner.player === null;
-    const destroyed = destroyers.length > 0;
+    // A game ending badge cut the game short, so whoever did not take it is stamped
+    const gameWasCut = destroyers.length > 0;
     const finishedByBadge = won && destroyers.includes(player);
     return (
         <PlayerColumn player={player} active={won} winner={won}>
             <div className="player-body player-body-stage">
                 <PlayerIdentity player={player}
-                                label={PLAYER_LABELS[player]}
                                 name={state.name}
                                 mirrored={player === "p2"}/>
                 <PlayerResultPanel player={player}
                                    character={state.character}
                                    winner={won}
-                                   destroyed={destroyed && !won && !drawn}
+                                   destroyed={gameWasCut && !won && !drawn}
                                    action={state.action}
                                    finishedByBadge={finishedByBadge}/>
             </div>

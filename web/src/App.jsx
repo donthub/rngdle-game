@@ -173,8 +173,8 @@ function Game({ setup, onRematch, onReset }) {
     }
 
     // Only the setup page carries the bar. Both scored pages drop it, which gives the
-    // character art back the 44px it would take; there the rope is the top of the window
-    // and each column names its own player (see TugOfWar.jsx).
+    // character art back the 44px it would take; there the line is the top of the window
+    // and each column names its own player (see ScoreLine.jsx).
     return (
         <div className="app">
             {gameStatus === GameStatus.WAITING ? <TopBar/> : null}

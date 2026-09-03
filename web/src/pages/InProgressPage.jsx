@@ -3,10 +3,10 @@ import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
 import PlayerBadge from "../components/PlayerBadge.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerIdentity from "../components/PlayerIdentity.jsx";
-import TugOfWar from "../components/TugOfWar.jsx";
+import ScoreLine from "../components/ScoreLine.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
-// The scores share one rope across the top of the window (see TugOfWar.jsx), which leaves
+// The scores share one line across the top of the window (see ScoreLine.jsx), which leaves
 // the columns under it carrying their own name and the character art. The window is only
 // 520px tall, so this is what buys the art most of its height back.
 //
@@ -38,7 +38,7 @@ function StageColumn({ player, state }) {
 export default function InProgressPage({ currentRound, rounds, p1, p2 }) {
     return (
         <div className="board-layout">
-            <TugOfWar p1={p1} p2={p2}/>
+            <ScoreLine p1={p1} p2={p2}/>
             <div className="board-triptych">
                 <StageColumn player="p1" state={p1}/>
                 <div className="center-column center-column-play">

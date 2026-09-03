@@ -1,7 +1,7 @@
 import PlayerColumn from "../components/PlayerColumn.jsx";
 import PlayerIdentity from "../components/PlayerIdentity.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
-import TugOfWar from "../components/TugOfWar.jsx";
+import ScoreLine from "../components/ScoreLine.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
 const WINNERS = Object.freeze({
@@ -33,7 +33,7 @@ function resolveWinner(states, destroyers) {
     return DRAW;
 }
 
-// The scores stay up on the rope where they finished (see TugOfWar.jsx), so the columns
+// The scores stay up on the line where they finished (see ScoreLine.jsx), so the columns
 // carry their own name and the art. On a draw neither side is tinted, and nobody is
 // destroyed either.
 function ResultColumn({ player, state, winner, destroyers }) {
@@ -63,7 +63,7 @@ export default function FinishedPage({ currentRound, rounds, p1, p2, destroyers,
     const winner = resolveWinner({ p1, p2 }, destroyers);
     return (
         <div className="board-layout">
-            <TugOfWar p1={p1} p2={p2} leader={winner.player}/>
+            <ScoreLine p1={p1} p2={p2} leader={winner.player}/>
             <div className="board-triptych">
                 <ResultColumn player="p1" state={p1} winner={winner} destroyers={destroyers}/>
                 <div className="center-column center-column-result">

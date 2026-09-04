@@ -7,6 +7,10 @@ class GameApi:
     def __init__(self, page: Page):
         self.page = page
 
+    def focus(self):
+        """Raises the game window, which the player windows take focus from as they open."""
+        self.page.bring_to_front()
+
     def wait_until_ready(self):
         self.page.wait_for_function("() => window.gameApi !== undefined")
 

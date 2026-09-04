@@ -51,9 +51,10 @@ class Badge:
 class PlayerRound:
     """One player's rngdle.com window for a single round, run on a thread of its own.
 
-    The main thread waits on `ready_event` before releasing `roll_event`, then on
-    `score_event`, after which `score` is the total the page settled on. `stop_event`
-    holds the window open until both results have been on screen for a moment.
+    The main thread waits on `launched_event` to hand focus back to the game window,
+    then on `ready_event` before releasing `roll_event`, then on `score_event`, after
+    which `score` is the total the page settled on. `stop_event` holds the window open
+    until both results have been on screen for a moment.
     """
 
     player: str
@@ -61,6 +62,7 @@ class PlayerRound:
     badge_queue: queue.Queue
     roll_event: threading.Event
     stop_event: threading.Event
+    launched_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     ready_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     score_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     score: int | None = None
@@ -77,6 +79,7 @@ class PlayerRound:
         # A Playwright instance of its own, because the sync API is not thread safe
         with sync_playwright() as playwright:
             context, page = browser.launch_app_window(playwright, RNGDLE_URL, self.position, PLAYER_WINDOW_SIZE)
+            self.launched_event.set()  # signal that this window is up, so the game window can be refocused
 
             page.locator(THEME_BUTTON).click()
             remove_element(page, "header")
@@ -139,6 +142,10 @@ def start_round(game_api: GameApi):
 
     for player_round in player_rounds:
         player_round.start()
+
+    for player_round in player_rounds:
+        player_round.launched_event.wait()
+    game_api.focus()
 
     for player_round in player_rounds:
         player_round.ready_event.wait()

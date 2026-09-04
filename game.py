@@ -1,5 +1,6 @@
 import logging
 
+from playwright.async_api import Page
 from playwright.sync_api import sync_playwright
 
 import browser
@@ -11,14 +12,18 @@ logger = logging.getLogger(__name__)
 
 WINDOW_POSITION = (-10, -30)
 WINDOW_SIZE = (1940, 545)
+BLANK_WINDOW_POSITION = (-10, 475)
+BLANK_WINDOW_SIZE = (1940, 1080)
 
 
 def run(config: dict):
     logger.info(f"Config: {config}")
 
     with web_server.WebServer(port=config.get("web_port", 5173)) as server, sync_playwright() as playwright:
+        blank_context, blank_page = browser.launch_app_window(playwright, "about:blank", BLANK_WINDOW_POSITION, BLANK_WINDOW_SIZE)
+        set_background(blank_page)
+
         context, page = browser.launch_app_window(playwright, server.url, WINDOW_POSITION, WINDOW_SIZE)
-        page.goto(server.url)
 
         game_api = GameApi(page)
         game_api.wait_until_ready()
@@ -33,6 +38,7 @@ def run(config: dict):
             play_game(game_api)
 
         context.close()
+        blank_context.close()
 
 
 def play_game(game_api: GameApi):
@@ -57,3 +63,7 @@ def play_game(game_api: GameApi):
     game_api.finish_game()
     game_api.wait_until_finished()
     game_api.wait_until_not_finished()
+
+
+def set_background(page: Page):
+    page.locator("body").evaluate("(element, style) => element.setAttribute('style', style)", "background-color: #fafaf7")

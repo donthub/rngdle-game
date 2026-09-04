@@ -127,6 +127,7 @@ class PlayerRound:
 
 def start_round(game_api: GameApi):
     """Rolls both players' windows in step, feeding badges to the board as they land."""
+    game_api.set_initializing(True)
     roll_event, stop_event = threading.Event(), threading.Event()
     badge_queue = queue.Queue()
     player_rounds = [
@@ -148,6 +149,7 @@ def start_round(game_api: GameApi):
     logger.info("All pages ready")
 
     roll_event.set()
+    game_api.set_initializing(False)
 
     for player_round in player_rounds:
         wait_for_event(player_round.score_event, game_api, badge_queue)

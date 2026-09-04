@@ -62,6 +62,7 @@ function Game({ setup, onRematch, onReset }) {
     const [rounds, setRounds] = React.useState(setup.rounds);
     const [currentRound, setCurrentRound] = React.useState(null);
     const [gameStatus, setGameStatus] = React.useState(GameStatus.WAITING);
+    const [isInitializing, setIsInitializing] = React.useState(false);
     const [destroyers, setDestroyers] = React.useState([]);
     const [finishRequested, setFinishRequested] = React.useState(false);
     const [selectedPlayerIndex, setSelectedPlayerIndex] = React.useState(0);
@@ -108,6 +109,7 @@ function Game({ setup, onRematch, onReset }) {
         window.gameApi = {
             // Setters
             setCurrentRound: value => setCurrentRound(Number(value)),
+            setInitializing: value => setIsInitializing(Boolean(value)),
             addScore: (player, value) => playersByKey[player].addScore(value),
             addBadge: (player, value) => addBadge(player, value),
             finishGame: () => setFinishRequested(true),
@@ -175,6 +177,7 @@ function Game({ setup, onRematch, onReset }) {
     } else {
         page = <InProgressPage currentRound={displayedRound}
                        rounds={rounds}
+                       isInitializing={isInitializing}
                        p1={p1.state}
                        p2={p2.state}/>;
     }

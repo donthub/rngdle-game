@@ -36,6 +36,10 @@ class GameApi:
     def set_current_round(self, round_index: int):
         self.call("setCurrentRound", round_index)
 
+    def set_initializing(self, initializing: bool):
+        """Tells the board whether it is still waiting on the player windows to come up."""
+        self.call("setInitializing", initializing)
+
     def add_score(self, player: str, score: int):
         self.call("addScore", player, score)
 

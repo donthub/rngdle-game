@@ -21,11 +21,32 @@ function StageColumn({ player, state }) {
     );
 }
 
+// The pages the driver rolls are opened afresh every round, and nothing lands on the board
+// until both of them are up (see game_round.py). The wait is named here rather than left as
+// a still board, and the slot is held open either way so the round meter above it keeps its
+// place when the line has nothing to say.
+function RoundStatus({ isInitializing }) {
+    return (
+        <div className="round-status">
+            {isInitializing ? (
+                <>
+                    <span className="section-label">Initializing</span>
+                    <span className="round-status-dots">
+                        <span className="round-status-dot">.</span>
+                        <span className="round-status-dot">.</span>
+                        <span className="round-status-dot">.</span>
+                    </span>
+                </>
+            ) : null}
+        </div>
+    );
+}
+
 // The top bar stands down once the setup page is behind us (see App.jsx) and nothing
 // replaces it: the round meter is all the middle column has to say while a round runs.
 // Both sides are in play, so both accent rules are lit, unlike on the other two pages
 // where the rule marks whoever is picking or whoever won.
-export default function InProgressPage({ currentRound, rounds, p1, p2 }) {
+export default function InProgressPage({ currentRound, rounds, isInitializing, p1, p2 }) {
     return (
         <div className="board-layout">
             <ScoreLine p1={p1} p2={p2}/>
@@ -33,6 +54,7 @@ export default function InProgressPage({ currentRound, rounds, p1, p2 }) {
                 <StageColumn player="p1" state={p1}/>
                 <div className="center-column center-column-play">
                     <InfoRounds currentRound={currentRound} rounds={rounds}/>
+                    <RoundStatus isInitializing={isInitializing}/>
                 </div>
                 <StageColumn player="p2" state={p2}/>
             </div>

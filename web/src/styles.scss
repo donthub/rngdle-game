@@ -123,6 +123,7 @@ $character-enter-duration: 160ms;
 $roster-fade-duration: 140ms;
 $name-clear-fade-duration: 140ms;
 $tally-pop-duration: 260ms;
+$round-status-dot-duration: 1200ms;
 
 *,
 *::before,
@@ -1001,6 +1002,49 @@ img {
 .round-meter-label-current {
     font-weight: 700;
     color: $color-ink;
+}
+
+// The line under the round meter that names what the board is waiting on. The slot keeps
+// the label's own height whether or not there is anything in it, so the meter above never
+// moves (see InProgressPage.jsx).
+.round-status {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-height: $font-size-label;
+}
+
+.round-status-dots {
+    display: flex;
+    font-size: $font-size-label;
+    font-weight: 600;
+    letter-spacing: $tracking-label;
+    color: $color-ink-soft;
+}
+
+// Each dot takes its turn a third of the cycle after the one before it, so the three read
+// as one wave passing along the line rather than three lights blinking together.
+.round-status-dot {
+    animation: round-status-dot $round-status-dot-duration linear infinite both;
+
+    &:nth-child(2) {
+        animation-delay: $round-status-dot-duration * 0.333;
+    }
+
+    &:nth-child(3) {
+        animation-delay: $round-status-dot-duration * 0.667;
+    }
+}
+
+@keyframes round-status-dot {
+    0%,
+    100% {
+        opacity: 0.2;
+    }
+
+    30% {
+        opacity: 1;
+    }
 }
 
 // --- Character selector --------------------------------------------------------

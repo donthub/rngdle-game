@@ -1,3 +1,4 @@
+import classNames from "../classNames.js";
 import InfoRounds from "../components/InfoRounds.jsx";
 import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
@@ -23,21 +24,18 @@ function StageColumn({ player, state }) {
 
 // The pages the driver rolls are opened afresh every round, and nothing lands on the board
 // until both of them are up (see game_round.py). The wait is named here rather than left as
-// a still board, and the slot is held open either way so the round meter above it keeps its
-// place when the line has nothing to say.
+// a still board. The line stays mounted so it can fade in and out rather than blink on and
+// off, and the slot is held open either way so the round meter above it keeps its place
+// when the line has nothing to say.
 function RoundStatus({ isInitializing }) {
     return (
-        <div className="round-status">
-            {isInitializing ? (
-                <>
-                    <span className="initializing-label">Initializing</span>
-                    <span className="round-status-dots">
-                        <span className="round-status-dot">.</span>
-                        <span className="round-status-dot">.</span>
-                        <span className="round-status-dot">.</span>
-                    </span>
-                </>
-            ) : null}
+        <div className={classNames("round-status", isInitializing && "round-status-shown")}>
+            <span className="initializing-label">Initializing</span>
+            <span className="round-status-dots">
+                <span className="round-status-dot">.</span>
+                <span className="round-status-dot">.</span>
+                <span className="round-status-dot">.</span>
+            </span>
         </div>
     );
 }

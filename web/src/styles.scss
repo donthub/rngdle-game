@@ -124,6 +124,7 @@ $roster-fade-duration: 140ms;
 $name-clear-fade-duration: 140ms;
 $tally-pop-duration: 260ms;
 $round-status-dot-duration: 1200ms;
+$round-status-fade-duration: 220ms;
 
 *,
 *::before,
@@ -1015,15 +1016,20 @@ img {
 .round-status {
     display: flex;
     align-items: center;
-    gap: 4px;
     min-height: $font-size-label;
+    opacity: 0;
+    transition: opacity $round-status-fade-duration ease;
 }
 
+.round-status-shown {
+    opacity: 1;
+}
+
+// Carries the label's own type, so the dots read as the end of the word rather than as
+// three marks of their own beside it.
 .round-status-dots {
     display: flex;
-    font-size: $font-size-label;
-    font-weight: 600;
-    letter-spacing: $tracking-label;
+    font-size: $font-size-body;
     color: $color-ink-soft;
 }
 
@@ -1031,6 +1037,11 @@ img {
 // as one wave passing along the line rather than three lights blinking together.
 .round-status-dot {
     animation: round-status-dot $round-status-dot-duration linear infinite both;
+    animation-play-state: paused;
+
+    .round-status-shown & {
+        animation-play-state: running;
+    }
 
     &:nth-child(2) {
         animation-delay: $round-status-dot-duration * 0.333;

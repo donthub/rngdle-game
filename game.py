@@ -42,11 +42,10 @@ def run(config: dict):
 
 
 def play_game(game_api: GameApi):
-    logger.info(f"P1 name: {game_api.get_name('p1')}")
-    logger.info(f"P2 name: {game_api.get_name('p2')}")
-
+    p1_name = game_api.get_name("p1")
+    p2_name = game_api.get_name("p2")
     rounds = game_api.get_rounds()
-    logger.info(f"Rounds: {rounds}")
+    logger.info({"p1_name": p1_name, "p2_name": p2_name, "rounds": rounds})
 
     round_index = 0
     while round_index < rounds:

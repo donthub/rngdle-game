@@ -113,9 +113,10 @@ class PlayerRound:
                 # the order they were rolled
                 badge = badges.nth(badges_count - collected_count - 1)
                 rarity = badge.locator(BADGE_RARITY).text_content()
-                logger.info(f"[{self.player}] Badge rarity: {rarity}")
                 score = parse_score(badge.locator(BADGE_SCORE).text_content())
-                self.badge_queue.put(Badge(player=self.player, rarity=rarity, score=score))
+                badge_item = Badge(player=self.player, rarity=rarity, score=score)
+                logger.info(badge_item)
+                self.badge_queue.put(badge_item)
                 collected_count += 1
 
             if page.locator(SCORE_READY).count() > 0:
@@ -150,7 +151,7 @@ def start_round(game_api: GameApi):
 
     for player_round in player_rounds:
         wait_for_event(player_round.score_event, game_api, badge_queue)
-        logger.info(f"[{player_round.player}] Score: {player_round.score}")
+        logger.info({"player": player_round.player, "score": player_round.score})
 
     hold_focus(game_api, RESULT_DISPLAY_SECONDS)
 

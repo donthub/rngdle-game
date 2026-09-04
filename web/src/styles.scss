@@ -1062,12 +1062,11 @@ img {
 }
 
 // The cell under the pointer is ringed in the colour of whoever the click would hand it
-// to, and dashed, so a pick about to be made never reads as one already made. The ring is
+// to, so a pick about to be made never reads as one already made. The ring is
 // haloed rather than the board dimmed, so no portrait is ever faded to make it stand out.
 // Keyboard focus moves the same hover, so it needs no ring of its own.
 .roster-cell-hovered {
     stroke-width: 3;
-    stroke-dasharray: 6 4;
 }
 
 @each $player, $tokens in $players {

@@ -9,8 +9,10 @@ import classNames from "../classNames.js";
 // a hue and a number, so the row holds one height whatever lands on it and the art below
 // keeps the room it started with. The rarity that just landed is outlined in its own hue
 // and steps forward as its count goes up - keying it on the roll is what replays that
-// when the same rarity comes round again. Nothing is still landing once the game is
-// settled, so there nothing is outlined (see FinishedPage.jsx).
+// when the same rarity comes round again. A chip standing on its first roll has no place
+// in the row yet, so it fades up as it takes one rather than appearing outright. Nothing
+// is still landing once the game is settled, so there nothing is outlined and nothing
+// fades (see FinishedPage.jsx).
 export default function PlayerTally({ player, badges, settled = false }) {
     return (
         <div className={`player-tally player-tally-${player}`}>
@@ -20,7 +22,8 @@ export default function PlayerTally({ player, badges, settled = false }) {
                     <span key={latest ? `${badge}-${badges.roll}` : badge}
                           className={classNames("player-tally-chip",
                               `player-tally-chip-${badge.toLowerCase()}`,
-                              latest && "player-tally-chip-latest")}>
+                              latest && "player-tally-chip-latest",
+                              latest && count === 1 && "player-tally-chip-new")}>
                         <span className="player-tally-dot"/>
                         <span className="player-tally-count">{count}</span>
                     </span>

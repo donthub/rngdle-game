@@ -123,6 +123,7 @@ $character-enter-duration: 160ms;
 $roster-fade-duration: 140ms;
 $name-clear-fade-duration: 140ms;
 $tally-pop-duration: 260ms;
+$tally-fade-duration: 220ms;
 $round-status-dot-duration: 1200ms;
 $round-status-fade-duration: 220ms;
 
@@ -361,6 +362,15 @@ img {
     animation: player-tally-pop $tally-pop-duration cubic-bezier(0.2, 0.7, 0.3, 1) both;
 }
 
+// A rarity on its first roll is opening a place in the row rather than adding to one it
+// already holds, so it fades up as it pops in (see PlayerTally.jsx). Both animations are
+// named here, since one animation property carries them and this rule stands after the
+// one above.
+.player-tally-chip-new {
+    animation: player-tally-pop $tally-pop-duration cubic-bezier(0.2, 0.7, 0.3, 1) both,
+    player-tally-fade-in $tally-fade-duration ease-out both;
+}
+
 .player-tally-dot {
     align-self: center;
     width: 6px;
@@ -415,6 +425,15 @@ img {
     }
     100% {
         transform: scale(1);
+    }
+}
+
+@keyframes player-tally-fade-in {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
     }
 }
 

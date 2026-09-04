@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 WINDOW_POSITION = (-10, -30)
 WINDOW_SIZE = (1940, 545)
-BLANK_WINDOW_POSITION = (-10, 475)
+BLANK_WINDOW_POSITION = (-10, 0)
 BLANK_WINDOW_SIZE = (1940, 1080)
 
 

@@ -22,7 +22,7 @@ PLAYER_WINDOW_SIZE = (978, 1080)
 
 RESULT_DISPLAY_SECONDS = 3
 BADGE_POLL_SECONDS = 0.1
-FOCUS_POLL_SECONDS = 0.1
+EVENT_POLL_SECONDS = 0.1
 
 RESULT_PANEL = "main > div:nth-of-type(1)"
 SCORE_PANEL = f"{RESULT_PANEL} > div:nth-of-type(3)"
@@ -145,7 +145,7 @@ def start_round(game_api: GameApi):
         player_round.start()
 
     for player_round in player_rounds:
-        wait_for_event(player_round.ready_event, game_api, badge_queue)
+        wait_for_event(player_round.ready_event, game_api, badge_queue, focus=True)
     logger.info("All pages ready")
 
     roll_event.set()
@@ -155,7 +155,7 @@ def start_round(game_api: GameApi):
         wait_for_event(player_round.score_event, game_api, badge_queue)
         logger.info({"player": player_round.player, "score": player_round.score})
 
-    hold_focus(game_api, RESULT_DISPLAY_SECONDS)
+    time.sleep(RESULT_DISPLAY_SECONDS)
 
     stop_event.set()
     for player_round in player_rounds:
@@ -163,20 +163,13 @@ def start_round(game_api: GameApi):
     drain_badge_queue(game_api, badge_queue)
 
 
-def wait_for_event(event: threading.Event, game_api: GameApi, badge_queue: queue.Queue):
-    """Waits out `event`, holding the game window in focus and feeding badges to the board."""
-    while not event.wait(FOCUS_POLL_SECONDS):
-        game_api.focus()
+def wait_for_event(event: threading.Event, game_api: GameApi, badge_queue: queue.Queue, focus: bool = False):
+    """Waits out `event`, feeding badges to the board, holding the game window in focus if asked."""
+    while not event.wait(EVENT_POLL_SECONDS):
+        if focus:
+            game_api.focus()
         drain_badge_queue(game_api, badge_queue)
     drain_badge_queue(game_api, badge_queue)
-
-
-def hold_focus(game_api: GameApi, seconds: float):
-    """Keeps the game window in focus while the results stay on screen."""
-    deadline = time.monotonic() + seconds
-    while time.monotonic() < deadline:
-        time.sleep(FOCUS_POLL_SECONDS)
-        game_api.focus()
 
 
 def drain_badge_queue(game_api: GameApi, badge_queue: queue.Queue):

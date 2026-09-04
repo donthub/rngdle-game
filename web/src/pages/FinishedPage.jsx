@@ -1,7 +1,6 @@
 import PlayerColumn from "../components/PlayerColumn.jsx";
-import PlayerIdentity from "../components/PlayerIdentity.jsx";
+import PlayerHeader from "../components/PlayerHeader.jsx";
 import PlayerResultPanel from "../components/PlayerResultPanel.jsx";
-import PlayerTally from "../components/PlayerTally.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
 import { PLAYER_LABELS } from "../players.js";
 
@@ -50,18 +49,13 @@ function ResultColumn({ player, state, winner, destroyers }) {
     return (
         <PlayerColumn player={player} active={won} winner={won}>
             <div className="player-body player-body-stage">
-                <PlayerIdentity player={player}
-                                name={state.name}
-                                mirrored={player === "p2"}/>
-                <div className="player-stage-area">
-                    <PlayerResultPanel player={player}
-                                       character={state.character}
-                                       winner={won}
-                                       destroyed={gameWasCut && !won && !drawn}
-                                       action={state.action}
-                                       finishedByBadge={finishedByBadge}/>
-                    <PlayerTally player={player} badges={state.badges} settled/>
-                </div>
+                <PlayerHeader player={player} name={state.name} badges={state.badges} settled/>
+                <PlayerResultPanel player={player}
+                                   character={state.character}
+                                   winner={won}
+                                   destroyed={gameWasCut && !won && !drawn}
+                                   action={state.action}
+                                   finishedByBadge={finishedByBadge}/>
             </div>
         </PlayerColumn>
     );

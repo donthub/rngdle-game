@@ -17,15 +17,16 @@ export function isGameEndingBadge(badge) {
     return GAME_ENDING_BADGES.includes(badge);
 }
 
-// The tally is read as a fixed ladder with the rarest at the top, which is the order the
-// move types above are written in, backwards (see PlayerTally.jsx).
-const BADGE_LADDER = Object.freeze(Object.keys(BADGE_MOVE_TYPES).reverse());
+// The tally is read as a fixed row running outward from the middle of the board, rarest
+// at the inner end, which is the order the move types above are written in
+// (see PlayerTally.jsx).
+const BADGE_ORDER = Object.freeze(Object.keys(BADGE_MOVE_TYPES));
 
-// The rarities a player has rolled, rarest first, with how many of each. A rarity the
+// The rarities a player has rolled, commonest first, with how many of each. A rarity the
 // board has no move type for is one it has never seen, so it has no hue either: it is
-// left off the ladder the same way it is left off the stage.
+// left off the row the same way it is left off the stage.
 export function rolledBadges(counts) {
-    return BADGE_LADDER
+    return BADGE_ORDER
         .filter(badge => counts[badge] > 0)
         .map(badge => ({ badge, count: counts[badge] }));
 }

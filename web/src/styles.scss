@@ -300,7 +300,21 @@ img {
     min-height: 0;
 }
 
-// Stretched across the column, so a mirrored row packs the name against the outer edge
+// The name and the tally at the two ends of one line, mirrored for p2 so the name is
+// always on the column's outer edge and the tally always in the corner closer to the
+// middle of the board (see PlayerHeader.jsx).
+.player-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.player-header-mirrored {
+    flex-direction: row-reverse;
+}
+
+// Shrinks rather than crowding the tally, so a long name is the thing that gives way
 .player-identity {
     display: flex;
     align-items: baseline;
@@ -312,32 +326,23 @@ img {
     flex-direction: row-reverse;
 }
 
-// The ladder of chips itself, hung from the name down the column's outer edge and drawn
-// over the stage beside it: the move art is centred and renders wider than the column it
-// stands in, so there is no edge it does not reach (see PlayerTally.jsx).
+// The row of chips itself, held at the header's inner end by the row around it. It is
+// reversed for p2 so both sides run outward from the middle of the board rather than both
+// running left to right (see PlayerTally.jsx).
 .player-tally {
-    position: absolute;
-    top: 0;
-    z-index: 2;
     display: flex;
     flex: none;
-    flex-direction: column;
-    gap: 5px;
-}
-
-.player-tally-p1 {
-    left: 0;
-    align-items: flex-start;
+    align-items: baseline;
+    gap: 6px;
 }
 
 .player-tally-p2 {
-    right: 0;
-    align-items: flex-end;
+    flex-direction: row-reverse;
 }
 
 // Every chip is the same shape whatever it is holding: the hue it rolled in and the
 // number. The border is carried by all of them and only coloured on one, so outlining
-// the latest costs the ladder no width (see PlayerTally.jsx).
+// the latest costs the row no width (see PlayerTally.jsx).
 .player-tally-chip {
     display: flex;
     gap: 5px;
@@ -369,8 +374,8 @@ img {
     font-variant-numeric: tabular-nums;
 }
 
-// One hue per rarity as ever, but mixed into the ground behind the chip rather than
-// washed over it: at 7% alpha the character art under the rail comes straight through.
+// One hue per rarity, mixed into the ground behind the chip rather than washed over it:
+// at 7% alpha the chip reads as a tint of the board it sits on rather than a block on it.
 @each $rarity, $accent in $badge-rarities {
     .player-tally-chip-#{$rarity} {
         background: color.mix($accent, $color-bg, 7%);
@@ -601,16 +606,6 @@ img {
 
 
 // --- Stage: art stands on a hairline floor with a soft contact shadow ----------
-
-// The stage and the tally rail share this box. The rail is positioned against it and
-// stays outside the stage, which is mirrored whole for p2 below - inside it, the chips
-// would be flipped along with the art.
-.player-stage-area {
-    position: relative;
-    display: flex;
-    flex: 1 1 auto;
-    min-height: 0;
-}
 
 .player-stage {
     position: relative;

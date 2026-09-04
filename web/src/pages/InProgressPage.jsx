@@ -1,27 +1,21 @@
 import InfoRounds from "../components/InfoRounds.jsx";
 import PlayerActionPanel from "../components/PlayerActionPanel.jsx";
 import PlayerColumn from "../components/PlayerColumn.jsx";
-import PlayerIdentity from "../components/PlayerIdentity.jsx";
-import PlayerTally from "../components/PlayerTally.jsx";
+import PlayerHeader from "../components/PlayerHeader.jsx";
 import ScoreLine from "../components/ScoreLine.jsx";
 
 // The scores share one line across the top of the window (see ScoreLine.jsx), which leaves
 // the columns under it carrying their own name and the character art. The window is only
 // 520px tall, so this is what buys the art most of its height back.
 //
-// The identity is mirrored for p2, which keeps every name on the outer edge of its column,
-// and the tally hangs from it on that same edge (see PlayerTally.jsx).
+// The header row is mirrored for p2, which keeps every name on the outer edge of its
+// column and the tally in the corner closer to the middle (see PlayerHeader.jsx).
 function StageColumn({ player, state }) {
     return (
         <PlayerColumn player={player} active>
             <div className="player-body player-body-stage">
-                <PlayerIdentity player={player}
-                                name={state.name}
-                                mirrored={player === "p2"}/>
-                <div className="player-stage-area">
-                    <PlayerActionPanel player={player} character={state.character} action={state.action}/>
-                    <PlayerTally player={player} badges={state.badges}/>
-                </div>
+                <PlayerHeader player={player} name={state.name} badges={state.badges}/>
+                <PlayerActionPanel player={player} character={state.character} action={state.action}/>
             </div>
         </PlayerColumn>
     );

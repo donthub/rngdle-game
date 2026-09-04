@@ -86,6 +86,7 @@ class PlayerRound:
             self.roll_event.wait()
 
             page.locator(ROLL_BUTTON).click()
+            hide_scrollbar(page)
 
             page.get_by_text("Badge breakdown").wait_for(timeout=0)
             remove_element(page, BADGE_PANEL_TITLE)
@@ -191,3 +192,13 @@ def parse_score(score_text: str) -> int:
 
 def remove_element(page: Page, selector: str):
     page.locator(selector).evaluate("element => element.remove()")
+
+
+def hide_scrollbar(page: Page):
+    selector = "main[data-page-scroll-container='true']"
+    page.wait_for_selector(selector, timeout=0)
+    set_style(page, selector, "scrollbar-width: none")
+
+
+def set_style(page: Page, selector: str, style: str):
+    page.locator(selector).evaluate("(element, style) => element.setAttribute('style', style)", style)

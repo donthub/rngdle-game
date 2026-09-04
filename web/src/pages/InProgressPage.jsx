@@ -30,7 +30,7 @@ function RoundStatus({ isInitializing }) {
         <div className="round-status">
             {isInitializing ? (
                 <>
-                    <span className="section-label">Initializing</span>
+                    <span className="initializing-label">Initializing</span>
                     <span className="round-status-dots">
                         <span className="round-status-dot">.</span>
                         <span className="round-status-dot">.</span>

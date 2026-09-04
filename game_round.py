@@ -12,7 +12,7 @@ from game_api import GameApi
 logger = logging.getLogger(__name__)
 
 RNGDLE_URL = "https://rngdle.com"
-RNGDLE_THEME = "Dark"
+RNGDLE_THEME = "Light"
 
 PLAYER_WINDOW_POSITIONS = {
     "p1": (-10, 475),

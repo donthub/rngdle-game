@@ -22,6 +22,7 @@ PLAYER_WINDOW_SIZE = (978, 585)
 
 RESULT_DISPLAY_SECONDS = 3
 BADGE_POLL_SECONDS = 0.1
+FOCUS_POLL_SECONDS = 0.1
 
 RESULT_PANEL = "main > div:nth-of-type(1)"
 SCORE_PANEL = f"{RESULT_PANEL} > div:nth-of-type(3)"
@@ -51,10 +52,9 @@ class Badge:
 class PlayerRound:
     """One player's rngdle.com window for a single round, run on a thread of its own.
 
-    The main thread waits on `launched_event` to hand focus back to the game window,
-    then on `ready_event` before releasing `roll_event`, then on `score_event`, after
-    which `score` is the total the page settled on. `stop_event` holds the window open
-    until both results have been on screen for a moment.
+    The main thread waits on `ready_event` before releasing `roll_event`, then on
+    `score_event`, after which `score` is the total the page settled on. `stop_event`
+    holds the window open until both results have been on screen for a moment.
     """
 
     player: str
@@ -62,7 +62,6 @@ class PlayerRound:
     badge_queue: queue.Queue
     roll_event: threading.Event
     stop_event: threading.Event
-    launched_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     ready_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     score_event: threading.Event = dataclasses.field(default_factory=threading.Event)
     score: int | None = None
@@ -79,7 +78,6 @@ class PlayerRound:
         # A Playwright instance of its own, because the sync API is not thread safe
         with sync_playwright() as playwright:
             context, page = browser.launch_app_window(playwright, RNGDLE_URL, self.position, PLAYER_WINDOW_SIZE)
-            self.launched_event.set()  # signal that this window is up, so the game window can be refocused
 
             page.locator(THEME_BUTTON).click()
             remove_element(page, "header")
@@ -144,20 +142,16 @@ def start_round(game_api: GameApi):
         player_round.start()
 
     for player_round in player_rounds:
-        player_round.launched_event.wait()
-    game_api.focus()
-
-    for player_round in player_rounds:
-        player_round.ready_event.wait()
+        wait_for_event(player_round.ready_event, game_api, badge_queue)
     logger.info("All pages ready")
 
     roll_event.set()
 
     for player_round in player_rounds:
-        wait_for_score(player_round.score_event, game_api, badge_queue)
+        wait_for_event(player_round.score_event, game_api, badge_queue)
         logger.info(f"[{player_round.player}] Score: {player_round.score}")
 
-    time.sleep(RESULT_DISPLAY_SECONDS)
+    hold_focus(game_api, RESULT_DISPLAY_SECONDS)
 
     stop_event.set()
     for player_round in player_rounds:
@@ -165,10 +159,20 @@ def start_round(game_api: GameApi):
     drain_badge_queue(game_api, badge_queue)
 
 
-def wait_for_score(score_event: threading.Event, game_api: GameApi, badge_queue: queue.Queue):
-    while not score_event.wait(BADGE_POLL_SECONDS):
+def wait_for_event(event: threading.Event, game_api: GameApi, badge_queue: queue.Queue):
+    """Waits out `event`, holding the game window in focus and feeding badges to the board."""
+    while not event.wait(FOCUS_POLL_SECONDS):
+        game_api.focus()
         drain_badge_queue(game_api, badge_queue)
     drain_badge_queue(game_api, badge_queue)
+
+
+def hold_focus(game_api: GameApi, seconds: float):
+    """Keeps the game window in focus while the results stay on screen."""
+    deadline = time.monotonic() + seconds
+    while time.monotonic() < deadline:
+        time.sleep(FOCUS_POLL_SECONDS)
+        game_api.focus()
 
 
 def drain_badge_queue(game_api: GameApi, badge_queue: queue.Queue):

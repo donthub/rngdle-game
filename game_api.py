@@ -8,7 +8,7 @@ class GameApi:
         self.page = page
 
     def focus(self):
-        """Raises the game window, which the player windows take focus from as they open."""
+        """Raises the game window, which the player windows keep taking focus from."""
         self.page.bring_to_front()
 
     def wait_until_ready(self):

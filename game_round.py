@@ -15,10 +15,10 @@ RNGDLE_URL = "https://rngdle.com"
 RNGDLE_THEME = "Dark"
 
 PLAYER_WINDOW_POSITIONS = {
-    "p1": (-10, 480),
-    "p2": (952, 480),
+    "p1": (-10, 505),
+    "p2": (952, 505),
 }
-PLAYER_WINDOW_SIZE = (978, 610)
+PLAYER_WINDOW_SIZE = (978, 585)
 
 RESULT_DISPLAY_SECONDS = 3
 BADGE_POLL_SECONDS = 0.1

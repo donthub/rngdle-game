@@ -10,7 +10,7 @@ from game_round import start_round
 logger = logging.getLogger(__name__)
 
 WINDOW_POSITION = (-10, -30)
-WINDOW_SIZE = (1940, 520)
+WINDOW_SIZE = (1940, 545)
 
 
 def run(config: dict):
